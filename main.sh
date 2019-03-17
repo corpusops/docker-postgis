@@ -587,6 +587,7 @@ do_refresh_ancestors() {
     cp -vf docker-postgis/*postgis*.sh .
     cp -vf $(find docker-pgrouting -name "initdb*sh"|sort -V|tail -n 1) .
     chmod +x *sh
+    chmod -x initdb-*.sh
 }
 
 #  refresh_images $args: refresh images files
