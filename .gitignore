@@ -1,0 +1,6 @@
+/local
+/
+/docker-*
+*.log
+/http-apt.postgresql.org-*
+/cached_postgis_sha_*
