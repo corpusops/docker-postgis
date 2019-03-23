@@ -21,19 +21,62 @@
 ## Supported tags
 - The following `corpusops/postgis-bare:<tag>` Docker Image tags are supported. <br/>
   The form is ``corpusops/postgis-bare:<POSTGIS_VER>-<POSTGIS_VER>``
-  - 9 (copy of latest 9.x tag)
-    - 9-2.5
-    - 9.4-2.4
-    - 9.6-2.4
-    - 9.5-2.4
-    - 9.4-2.5
-    - 9.5-2.5
-    - 9.6-2.5
-  - 10 (copy of latest 10.x tag)
-    - 10-2.4
-    - 10-2.5
-  - 11 (copy of latest 11.x tag)
-    - 11-2.5
+    - 9 (copy of latest 9.x tag)
+        - 9.4-2.4
+        - 9.5-2.4
+        - 9.6-2.4
+        - 9.4-2.5
+        - 9.5-2.5
+        - 9.6-2.5
+    - 10 (copy of latest 10.x tag)
+        - 10-2.4
+        - 10-2.5
+    - 11 (copy of latest 11.x tag)
+        - 11-2.5
+- The following `corpusops/pgrouting-bare:<tag>` Docker Image tags are supported. <br/>
+  The form is ``corpusops/pgrouting-bare:<POSTGIS_VER>-<POSTGIS_VER>-<PGROUTING_VER>``
+    - 9 (copy of latest 9.x tag)
+        - 9.4-2.4 (copy of latest 9.4-2.4 tag)
+            - 9.4-2.4-2.4
+            - 9.4-2.4-2.5
+            - 9.4-2.4-2.6
+        - 9.5-2.4 (copy of latest 9.5-2.4 tag)
+            - 9.5-2.4-2.4
+            - 9.5-2.4-2.5
+            - 9.5-2.4-2.6
+        - 9.6-2.4 (copy of latest 9.6-2.4 tag)
+            - 9.6-2.4-2.4
+            - 9.6-2.4-2.5
+            - 9.6-2.4-2.6
+        - 9.4-2.5 (copy of latest 9.4-2.5 tag)
+            - 9.4-2.5-2.4
+            - 9.4-2.5-2.5
+            - 9.4-2.5-2.6
+        - 9.5-2.5 (copy of latest 9.5-2.5 tag)
+            - 9.5-2.5-2.4
+            - 9.5-2.5-2.5
+            - 9.5-2.5-2.6
+        - 9.6-2.5 (copy of latest 9.6-2.5 tag)
+            - 9.6-2.5-2.4
+            - 9.6-2.5-2.5
+            - 9.6-2.5-2.6
+    - 10 (copy of latest 10 tag)
+        - 10-2.4 (copy of latest 10-2.4 tag)
+            - 10-2.4-2.4
+            - 10-2.4-2.5
+            - 10-2.4-2.6
+        - 10-2.5 (copy of latest 10-2.5 tag)
+            - 10-2.5-2.4
+            - 10-2.5-2.5
+            - 10-2.5-2.6
+    - 11 (copy of latest 11 tag)
+        - 11-2.5 (copy of latest 11.x-2.5 tag)
+            - 11-2.5-2.4
+            - 11-2.5-2.5
+            - 11-2.5-2.6
+  - Notes:
+      - ``pgrouting > 2.6 : postgis >= 2.2``
+      - ``pgrouting < 2.5 : postgis >= 2.0``
 
 ## Support development
 - [paypal](https://paypal.me/kiorky)
