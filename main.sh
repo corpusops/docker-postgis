@@ -271,6 +271,12 @@ corpusops/postgis-bare/latest\
  corpusops/postgis-bare/11\
  corpusops/postgis-bare/10\
  corpusops/postgis-bare/9\
+ corpusops/postgis-bare/9.2\
+ corpusops/postgis-bare/9.3\
+ corpusops/postgis-bare/9.2-2.3\
+ corpusops/postgis-bare/9.3-2.3\
+ corpusops/postgis-bare/9.3-2.4\
+ corpusops/postgis-bare/9.4-2.3\
  corpusops/postgis-bare/9.4-2.4\
  corpusops/postgis-bare/9.4-2.5\
  corpusops/postgis-bare/9.5-2.4\
@@ -283,7 +289,12 @@ corpusops/postgis-bare/latest\
 corpusops/postgis-bare/11-alpine\
  corpusops/postgis-bare/10-alpine\
  corpusops/postgis-bare/9-alpine\
+ corpusops/postgis-bare/9.2-alpine\
+ corpusops/postgis-bare/9.3-alpine\
  corpusops/postgis-bare/9.4-alpine\
+ corpusops/postgis-bare/9.2-2.3-alpine\
+ corpusops/postgis-bare/9.3-2.3-alpine\
+ corpusops/postgis-bare/9.3-2.4-alpine\
  corpusops/postgis-bare/9.4-2.4-alpine\
  corpusops/postgis-bare/9.4-2.5-alpine\
  corpusops/postgis-bare/9.5-alpine\
@@ -296,6 +307,51 @@ corpusops/postgis-bare/11-alpine\
  corpusops/postgis-bare/10-2.5-alpine\
  corpusops/postgis-bare/11-2.5-alpine::30
 "
+SKIP_REFRESH_ANCETORS=${SKIP_REFRESH_ANCETORS-}
+POSTGIS_MINOR_TAGS="
+9.2-2.3
+9.3-2.3 9.3-2.4
+9.4-2.3 9.4-2.4 9.5-2.4 9.6-2.4
+9.4-2.5 9.5-2.5 9.6-2.5
+10-2.4 10-2.5
+11-2.5
+"
+PGROUTING_MINOR_TAGS="
+9.4-2.4-2.4
+9.4-2.4-2.5
+9.4-2.4-2.6
+9.5-2.4-2.4
+9.5-2.4-2.5
+9.5-2.4-2.6
+9.6-2.4-2.4
+9.6-2.4-2.5
+9.6-2.4-2.6
+9.4-2.5-2.4
+9.4-2.5-2.5
+9.4-2.5-2.6
+9.5-2.5-2.4
+9.5-2.5-2.5
+9.5-2.5-2.6
+9.6-2.5-2.4
+9.6-2.5-2.5
+9.6-2.5-2.6
+10-2.4-2.4
+10-2.4-2.5
+10-2.4-2.6
+10-2.5-2.4
+10-2.5-2.5
+10-2.5-2.6
+11-2.5-2.4
+11-2.5-2.5"
+PGROUTING_MINOR_TAGS="
+11-2.5-2.6
+"
+POSTGRES_MAJOR="9 10 11"
+packagesUrlJessie='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
+packagesJessie="$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
+packagesStretch="$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+
 
 declare -A registry_tokens
 declare -A registry_services
@@ -566,21 +622,6 @@ do_clean_tags() {
     done < <(find "$W/$image" -mindepth 1 -maxdepth 1 -type d 2>/dev/null|skip_local)
 }
 
-SKIP_REFRESH_ANCETORS=${SKIP_REFRESH_ANCETORS-}
-POSTGIS_MINOR_TAGS="
-9.4-2.4 9.5-2.4 9.6-2.4
-9.4-2.5 9.5-2.5 9.6-2.5
-10-2.4 10-2.5
-11-2.5
-"
-POSTGRES_MAJOR="9 10 11"
-packagesUrlJessie='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
-packagesJessie="$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-curl -sSL "${packagesUrlJessie}.bz2" | bunzip2 > "$packagesJessie"
-packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
-packagesStretch="$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
-
 do_refresh_ancestors() {
     if [[ -n $SKIP_REFRESH_ANCETORS ]];then return;fi
     POSTGIS_URL="https://github.com/appropriate/docker-postgis.git"
@@ -595,14 +636,10 @@ do_refresh_ancestors() {
     chmod -x initdb-*.sh
 }
 
-#  refresh_images $args: refresh images files
-#     refresh_images:  (no arg) refresh all images
-#     refresh_images library/ubuntu: only refresh ubuntu images
-do_refresh_images() {
-    local imagess="${@:-$default_images}"
-    do_refresh_ancestors
-    # code adapted from: docker-postgis/update.sh
+do_refresh_postgis() {
     packages="$packagesStretch"
+    curl -sSL "${packagesUrlJessie}.bz2" | bunzip2 > "$packagesJessie"
+    curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
     for version in $POSTGIS_MINOR_TAGS;do
         IFS=- read pg_major postgis_major <<< "$version"
         img="corpusops/postgis-bare/$version"
@@ -627,10 +664,14 @@ do_refresh_images() {
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9.6/
     rsync -azv --delete corpusops/postgis-bare/9.5-2.5/        corpusops/postgis-bare/9.5/
     rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4/
+    rsync -azv --delete corpusops/postgis-bare/9.3-2.4/        corpusops/postgis-bare/9.3/
+    rsync -azv --delete corpusops/postgis-bare/9.2-2.3/        corpusops/postgis-bare/9.2/
 
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9.6-alpine/
     rsync -azv --delete corpusops/postgis-bare/9.5-2.5-alpine/ corpusops/postgis-bare/9.5-alpine/
     rsync -azv --delete corpusops/postgis-bare/9.4-2.5-alpine/ corpusops/postgis-bare/9.4-alpine/
+    rsync -azv --delete corpusops/postgis-bare/9.3-2.4-alpine/ corpusops/postgis-bare/9.3-alpine/
+    rsync -azv --delete corpusops/postgis-bare/9.2-2.3-alpine/ corpusops/postgis-bare/9.2-alpine/
 
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9/
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9-alpine/
@@ -643,6 +684,40 @@ do_refresh_images() {
 
     rsync -azv --delete corpusops/postgis-bare/11/             corpusops/postgis-bare/latest/
     rsync -azv --delete corpusops/postgis-bare/11-alpine/      corpusops/postgis-bare/alpine/
+}
+
+do_refresh_pgrouting() {
+    PGROUTING_TAGS="$(git ls-remote -q  --refs --tags https://github.com/pgRouting/pgrouting.git|sed -e "s/.*tags\///g"|egrep "v[0-9]"|sort -V)"
+    for version in $PGROUTING_MINOR_TAGS;do
+        IFS=- read pg_major postgis_major pgrouting_major <<< "$version"
+        tpgrouting_minor=$(echo "$PGROUTING_TAGS"|egrep -v "^v$postgis_major"|sort -V|tail -n1)
+        pgrouting_minor="${tpgrouting_minor:1}"
+        if [[ -z $pgrouting_minor ]];then
+            echo "No tag for $version"
+            exit 1
+        fi
+        img="corpusops/pgrouting-bare/$version"
+        for j in $img;do if [ ! -e "$j" ];then mkdir -p "$j";fi;done
+        cachedsrcVersion="cached_pgrouting_sha_${pgrouting_minor}"
+        if [ -e "$cachedsrcVersion" ];then
+            srcSha256="$(cat $cachedsrcVersion)"
+        else
+            srcSha256="$(curl -sSL "https://github.com/postgis/postgis/archive/$srcVersion.tar.gz" | sha256sum | awk '{ print $1 }')"
+            echo "$srcSha256" > "$cachedsrcVersion"
+        fi
+        cp -vf Dockerfile.pgrouting.template        "$img/Dockerfile"
+    done
+}
+
+#  refresh_images $args: refresh images files
+#     refresh_images:  (no arg) refresh all images
+#     refresh_images library/ubuntu: only refresh ubuntu images
+do_refresh_images() {
+    local imagess="${@:-$default_images}"
+    do_refresh_ancestors
+    # code adapted from: docker-postgis/update.sh
+    do_refresh_postgis
+    do_refresh_pgrouting
 }
 
 char_occurence() {
@@ -937,7 +1012,7 @@ do_usage() {
 
 do_main() {
     local args=${@:-usage}
-    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors"
+    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_postgis|refresh_pgrouting"
     actions="@($actions)"
     action=${1-};
     if [[ -n "$@" ]];then shift;fi
