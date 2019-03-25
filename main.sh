@@ -271,8 +271,14 @@ corpusops/postgis-bare/latest\
  corpusops/postgis-bare/11\
  corpusops/postgis-bare/10\
  corpusops/postgis-bare/9\
+ corpusops/postgis-bare/9.0\
+ corpusops/postgis-bare/9.1\
  corpusops/postgis-bare/9.2\
  corpusops/postgis-bare/9.3\
+ corpusops/postgis-bare/9.0-2.1\
+ corpusops/postgis-bare/9.1-2.1\
+ corpusops/postgis-bare/9.1-2.2\
+ corpusops/postgis-bare/9.2-2.2\
  corpusops/postgis-bare/9.2-2.3\
  corpusops/postgis-bare/9.3-2.3\
  corpusops/postgis-bare/9.3-2.4\
@@ -309,6 +315,9 @@ corpusops/postgis-bare/11-alpine\
 "
 SKIP_REFRESH_ANCETORS=${SKIP_REFRESH_ANCETORS-}
 POSTGIS_MINOR_TAGS="
+9.0-2.1
+9.1-2.2
+9.2-2.2 9.2-2.3
 9.2-2.3
 9.3-2.3 9.3-2.4
 9.4-2.3 9.4-2.4 9.5-2.4 9.6-2.4
@@ -637,10 +646,16 @@ do_refresh_ancestors() {
 }
 
 do_refresh_postgis() {
-    packages="$packagesStretch"
-    curl -sSL "${packagesUrlJessie}.bz2" | bunzip2 > "$packagesJessie"
+    curl -sSL "${packagesUrlJessie}.bz2"  | bunzip2 > "$packagesJessie"
     curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
     for version in $POSTGIS_MINOR_TAGS;do
+        if (echo $version|egrep -q "(9.0|9.1|9.2)-(2.0|2.1|2.2)");then
+            packages="$packagesJessie"
+            debian_release=jessie
+        else
+            packages="$packagesStretch"
+            debian_release=stretch
+        fi
         IFS=- read pg_major postgis_major <<< "$version"
         img="corpusops/postgis-bare/$version"
         imgalpine="corpusops/postgis-bare/$version-alpine"
@@ -666,6 +681,8 @@ do_refresh_postgis() {
     rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4/
     rsync -azv --delete corpusops/postgis-bare/9.3-2.4/        corpusops/postgis-bare/9.3/
     rsync -azv --delete corpusops/postgis-bare/9.2-2.3/        corpusops/postgis-bare/9.2/
+    rsync -azv --delete corpusops/postgis-bare/9.1-2.2/        corpusops/postgis-bare/9.1/
+    rsync -azv --delete corpusops/postgis-bare/9.0-2.1/        corpusops/postgis-bare/9.1/
 
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9.6-alpine/
     rsync -azv --delete corpusops/postgis-bare/9.5-2.5-alpine/ corpusops/postgis-bare/9.5-alpine/
