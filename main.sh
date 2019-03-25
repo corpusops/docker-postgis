@@ -266,7 +266,9 @@ find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.6
 BATCHED_IMAGES="\
-corpusops/postgis-bare/11\
+corpusops/postgis-bare/latest\
+ corpusops/postgis-bare/alpine\
+ corpusops/postgis-bare/11\
  corpusops/postgis-bare/10\
  corpusops/postgis-bare/9\
  corpusops/postgis-bare/9.4-2.4\
@@ -627,6 +629,9 @@ do_refresh_images() {
 
     rsync -azv --delete corpusops/postgis-bare/11-2.5/         corpusops/postgis-bare/11/
     rsync -azv --delete corpusops/postgis-bare/11-2.5-alpine/  corpusops/postgis-bare/11-alpine/
+
+    rsync -azv --delete corpusops/postgis-bare/11/        corpusops/postgis-bare/latest/
+    rsync -azv --delete corpusops/postgis-bare/11-alpine/ corpusops/postgis-bare/alpine/
 }
 
 char_occurence() {
