@@ -641,8 +641,8 @@ do_refresh_images() {
     rsync -azv --delete corpusops/postgis-bare/11-2.5/         corpusops/postgis-bare/11/
     rsync -azv --delete corpusops/postgis-bare/11-2.5-alpine/  corpusops/postgis-bare/11-alpine/
 
-    rsync -azv --delete corpusops/postgis-bare/11/        corpusops/postgis-bare/latest/
-    rsync -azv --delete corpusops/postgis-bare/11-alpine/ corpusops/postgis-bare/alpine/
+    rsync -azv --delete corpusops/postgis-bare/11/             corpusops/postgis-bare/latest/
+    rsync -azv --delete corpusops/postgis-bare/11-alpine/      corpusops/postgis-bare/alpine/
 }
 
 char_occurence() {
