@@ -23,6 +23,7 @@
   The form is ``corpusops/postgis-bare:<POSTGIS_VER>-<POSTGIS_VER>``
     - alpine suffix variant is supported for most versions, <br>
       Please refer to [online tags](https://hub.docker.com/r/corpusops/postgis-bare/tags).
+        - eg: ``corpusops/postgis-bare:9.5-2.4-alpine``
     - 9 (copy of latest 9 tag)
         - 9.4-2.4
         - 9.5-2.4
