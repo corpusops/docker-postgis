@@ -19,6 +19,7 @@
 - [And For **POSTGIS** based / inspired from this image](https://github.com/appropriate/docker-postgis)
 
 ## Supported tags
+### postgis
 - The following `corpusops/postgis-bare:<tag>[-alpine]` Docker Image tags are supported. <br/>
   The form is ``corpusops/postgis-bare:<POSTGIS_VER>-<POSTGIS_VER>``
     - `-alpine` suffix variant is supported for most versions except ``9.0`` & ``9.1``, <br>
@@ -47,6 +48,7 @@
         - 11-2.5
     - latest: (copy of latest 11 tag)
     - alpine: (copy of latest 11 alpine tag)
+### pgrouting
 - The following `corpusops/pgrouting-bare:<tag>` Docker Image tags are supported. <br/>
   The form is ``corpusops/pgrouting-bare:<POSTGIS_VER>-<POSTGIS_VER>-<PGROUTING_VER>``
     - 9 (copy of latest 9.x tag)
