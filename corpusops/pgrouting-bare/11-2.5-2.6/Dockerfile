@@ -12,3 +12,5 @@ RUN apt-get update && \
 
 RUN mkdir -p /docker-entrypoint-initdb.d
 COPY ./initdb-pgrouting.sh /docker-entrypoint-initdb.d/routing.sh
+LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
+ARG DOCKER_IMAGES_COMMIT=master

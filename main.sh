@@ -672,6 +672,8 @@ do_refresh_postgis() {
         fi
         cp -vf Dockerfile.postgis.template        "$img/Dockerfile"
         cp -vf docker-postgis/Dockerfile.alpine.template "$imgalpine/Dockerfile"
+        cat Dockerfile.labels Dockerfile.args >> "$img/Dockerfile"
+        cat Dockerfile.labels Dockerfile.args >> "$imgalpine/Dockerfile"
     sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
         sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$srcVersion"'/g; s/%%POSTGIS_SHA256%%/'"$srcSha256"'/g' "$imgalpine/Dockerfile"
     done
@@ -726,6 +728,7 @@ do_refresh_pgrouting() {
             echo "$srcSha256" > "$cachedsrcVersion"
         fi
         cp -vf Dockerfile.pgrouting.template        "$img/Dockerfile"
+        cat Dockerfile.labels Dockerfile.args >> "$img/Dockerfile"
     done
 }
 

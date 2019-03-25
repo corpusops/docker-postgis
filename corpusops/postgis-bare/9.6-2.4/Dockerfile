@@ -21,3 +21,5 @@ RUN mkdir -p /docker-entrypoint-initdb.d
 COPY ./initdb-postgis.sh /docker-entrypoint-initdb.d/postgis.sh
 COPY ./update-postgis.sh /usr/local/bin
 
+LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
+ARG DOCKER_IMAGES_COMMIT=master
