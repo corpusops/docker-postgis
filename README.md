@@ -21,7 +21,7 @@
 ## Supported tags
 - The following `corpusops/postgis-bare:<tag>[-alpine]` Docker Image tags are supported. <br/>
   The form is ``corpusops/postgis-bare:<POSTGIS_VER>-<POSTGIS_VER>``
-    - `-alpine` suffix variant is supported for most versions, <br>
+    - `-alpine` suffix variant is supported for most versions except ``9.0`` & ``9.1``, <br>
       Please refer to [online tags](https://hub.docker.com/r/corpusops/postgis-bare/tags).
         - eg: ``corpusops/postgis-bare:9.5-2.4-alpine``
     - 9 (copy of latest 9 tag)
