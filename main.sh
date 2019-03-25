@@ -612,7 +612,7 @@ do_refresh_images() {
             srcSha256="$(curl -sSL "https://github.com/postgis/postgis/archive/$srcVersion.tar.gz" | sha256sum | awk '{ print $1 }')"
             echo "$srcSha256" > "$cachedsrcVersion"
         fi
-        cp -vf docker-postgis/Dockerfile.template        "$img/Dockerfile"
+        cp -vf Dockerfile.postgis.template        "$img/Dockerfile"
         cp -vf docker-postgis/Dockerfile.alpine.template "$imgalpine/Dockerfile"
     sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
         sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$srcVersion"'/g; s/%%POSTGIS_SHA256%%/'"$srcSha256"'/g' "$imgalpine/Dockerfile"
