@@ -683,7 +683,7 @@ do_refresh_postgis() {
     rsync -azv --delete corpusops/postgis-bare/9.3-2.4/        corpusops/postgis-bare/9.3/
     rsync -azv --delete corpusops/postgis-bare/9.2-2.3/        corpusops/postgis-bare/9.2/
     rsync -azv --delete corpusops/postgis-bare/9.1-2.2/        corpusops/postgis-bare/9.1/
-    rsync -azv --delete corpusops/postgis-bare/9.0-2.1/        corpusops/postgis-bare/9.1/
+    rsync -azv --delete corpusops/postgis-bare/9.0-2.1/        corpusops/postgis-bare/9.0/
 
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9.6-alpine/
     rsync -azv --delete corpusops/postgis-bare/9.5-2.5-alpine/ corpusops/postgis-bare/9.5-alpine/
