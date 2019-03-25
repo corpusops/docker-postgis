@@ -283,10 +283,13 @@ corpusops/postgis-bare/latest\
 corpusops/postgis-bare/11-alpine\
  corpusops/postgis-bare/10-alpine\
  corpusops/postgis-bare/9-alpine\
+ corpusops/postgis-bare/9.4-alpine\
  corpusops/postgis-bare/9.4-2.4-alpine\
  corpusops/postgis-bare/9.4-2.5-alpine\
+ corpusops/postgis-bare/9.5-alpine\
  corpusops/postgis-bare/9.5-2.4-alpine\
  corpusops/postgis-bare/9.5-2.5-alpine\
+ corpusops/postgis-bare/9.6-alpine\
  corpusops/postgis-bare/9.6-2.4-alpine\
  corpusops/postgis-bare/9.6-2.5-alpine\
  corpusops/postgis-bare/10-2.4-alpine\
@@ -620,6 +623,14 @@ do_refresh_images() {
     sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
         sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$srcVersion"'/g; s/%%POSTGIS_SHA256%%/'"$srcSha256"'/g' "$imgalpine/Dockerfile"
     done
+
+    rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9.6/
+    rsync -azv --delete corpusops/postgis-bare/9.5-2.5/        corpusops/postgis-bare/9.5/
+    rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4
+
+    rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/        corpusops/postgis-bare/9.6-alpine/
+    rsync -azv --delete corpusops/postgis-bare/9.5-2.5-alpine/        corpusops/postgis-bare/9.5-alpine/
+    rsync -azv --delete corpusops/postgis-bare/9.4-2.5-alpine/        corpusops/postgis-bare/9.4-alpine/
 
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9/
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9-alpine/
