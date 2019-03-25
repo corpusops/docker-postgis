@@ -626,7 +626,7 @@ do_refresh_images() {
 
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9.6/
     rsync -azv --delete corpusops/postgis-bare/9.5-2.5/        corpusops/postgis-bare/9.5/
-    rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4
+    rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4/
 
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9.6-alpine/
     rsync -azv --delete corpusops/postgis-bare/9.5-2.5-alpine/ corpusops/postgis-bare/9.5-alpine/
