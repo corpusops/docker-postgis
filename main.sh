@@ -267,7 +267,6 @@ NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.6
 BATCHED_IMAGES="\
 corpusops/postgis-bare/latest\
- corpusops/postgis-bare/alpine\
  corpusops/postgis-bare/11\
  corpusops/postgis-bare/10\
  corpusops/postgis-bare/9\
@@ -292,7 +291,8 @@ corpusops/postgis-bare/latest\
  corpusops/postgis-bare/10-2.4\
  corpusops/postgis-bare/10-2.5\
  corpusops/postgis-bare/11-2.5::30
-corpusops/postgis-bare/11-alpine\
+corpusops/postgis-bare/alpine\
+ corpusops/postgis-bare/11-alpine\
  corpusops/postgis-bare/10-alpine\
  corpusops/postgis-bare/9-alpine\
  corpusops/postgis-bare/9.2-alpine\
@@ -676,6 +676,7 @@ do_refresh_postgis() {
         sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$srcVersion"'/g; s/%%POSTGIS_SHA256%%/'"$srcSha256"'/g' "$imgalpine/Dockerfile"
     done
 
+    set -ex
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9.6/
     rsync -azv --delete corpusops/postgis-bare/9.5-2.5/        corpusops/postgis-bare/9.5/
     rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4/
@@ -701,6 +702,8 @@ do_refresh_postgis() {
 
     rsync -azv --delete corpusops/postgis-bare/11/             corpusops/postgis-bare/latest/
     rsync -azv --delete corpusops/postgis-bare/11-alpine/      corpusops/postgis-bare/alpine/
+
+    rm -rf corpusops/postgis-bare/9.0-2.1-alpine
 }
 
 do_refresh_pgrouting() {
