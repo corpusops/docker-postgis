@@ -1,5 +1,6 @@
 FROM postgres:9.3-alpine
 MAINTAINER Régis Belson <me@regisbelson.fr>
+ADD jsonb.patch.bz2 /usr/src
 
 ENV POSTGIS_VERSION 2.4.4
 ENV POSTGIS_SHA256 0dff4902556ad45430e2b85dbe7e9baa758c6eb0bfd5ff6948f478beddd56b67
@@ -39,6 +40,7 @@ RUN set -ex \
         proj4-dev \
         protobuf-c-dev \
     && cd /usr/src/postgis \
+     && set -o pipefail && bzip2 -dck ../jsonb.patch.bz2|patch -Np1 \
     && ./autogen.sh \
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-grass/postgis.git/tree/debian/rules?h=jessie

@@ -674,11 +674,15 @@ do_refresh_postgis() {
         cp -vf docker-postgis/Dockerfile.alpine.template "$imgalpine/Dockerfile"
         cat Dockerfile.labels Dockerfile.args >> "$img/Dockerfile"
         cat Dockerfile.labels Dockerfile.args >> "$imgalpine/Dockerfile"
+        if ( echo $imgalpine | egrep -q "9.3.*alpine" ) && ( grep -vq jsonb.patch "$imgalpine/Dockerfile" );then
+            sed -i -r \
+                -e '/cd \/usr\/src\/postgis/ a\     && set -o pipefail && bzip2 -dck ../jsonb.patch.bz2|patch -Np1 \\' \
+                -e '/MAINTAINER/ a ADD jsonb.patch.bz2 /usr/src' \
+                "$imgalpine/Dockerfile"
+        fi
     sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
         sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$srcVersion"'/g; s/%%POSTGIS_SHA256%%/'"$srcSha256"'/g' "$imgalpine/Dockerfile"
     done
-
-    set -ex
     rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9.6/
     rsync -azv --delete corpusops/postgis-bare/9.5-2.5/        corpusops/postgis-bare/9.5/
     rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4/
