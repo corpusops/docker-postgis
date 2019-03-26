@@ -1,4 +1,4 @@
-FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%% as builder
+FROM corpusops/postgis-bare:9.6-2.4 as builder
 MAINTAINER kiorky <kiorky@cryptelium.net>
 RUN bash -euxc ': \
     && apt-get update -qq \
@@ -19,16 +19,16 @@ RUN bash -euc ': \
         ghostscript          \
         postgresql-server-dev-all \
     '
-ENV PGROUTING_REPO=%%PGROUTING_REPO%%
+ENV PGROUTING_REPO=https://salsa.debian.org/debian-gis-team/pgrouting.git
 RUN bash -euxc ': \
     && git clone $PGROUTING_REPO /usr/src/pgrouting'
 WORKDIR /usr/src/pgrouting
-ENV PG_MAJOR=%%PG_MAJOR%%
-ENV POSTGRES_MAJOR=%%PG_MAJOR%%
-ENV POSTGIS_MAJOR=%%POSTGIS_MAJOR%%
-ENV PGROUTING_MAJOR=%%PGROUTING_MAJOR%%
-ENV PGROUTING_VERSION=%%PGROUTING_VERSION%%
-ENV PGROUTING_DEBIAN_VERSION=%%PGROUTING_DEBIAN_VERSION%%
+ENV PG_MAJOR=9.6
+ENV POSTGRES_MAJOR=9.6
+ENV POSTGIS_MAJOR=2.4
+ENV PGROUTING_MAJOR=2.6
+ENV PGROUTING_VERSION=2.6.2-1
+ENV PGROUTING_DEBIAN_VERSION=debian/2.6.2-1
 ARG MAKEOPTS=-j4
 RUN bash -euxc ': \
     && git reset --hard $PGROUTING_DEBIAN_VERSION \
@@ -45,10 +45,10 @@ RUN bash -euxc ': \
 RUN bash -euxc ': \
     && debuild -i -us -uc -b'
 
-FROM corpusops/postgis-bare:%%PG_MAJOR%%-%%POSTGIS_MAJOR%%
+FROM corpusops/postgis-bare:9.6-2.4
 MAINTAINER kiorky <kiorky@cryptelium.net>
-ENV PGROUTING_MAJOR %%PGROUTING_MAJOR%%
-ENV PGROUTING_VERSION %%PGROUTING_VERSION%%
+ENV PGROUTING_MAJOR 2.6
+ENV PGROUTING_VERSION 2.6.2-1
 COPY --from=builder /usr/src/*deb /tmp/
 COPY ./initdb-pgrouting.sh /docker-entrypoint-initdb.d/routing.sh
 RUN bash -euxc ': \
@@ -58,3 +58,5 @@ RUN bash -euxc ': \
         $( ls /tmp/postgresql-$PG_MAJOR-pgrouting*deb -1 | grep -v dbg ) \
     && mkdir -p /docker-entrypoint-initdb.d \
     && rm -rvf /var/lib/apt/lists/* /tmp/*deb'
+LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
+ARG DOCKER_IMAGES_COMMIT=master

@@ -1,4 +1,5 @@
 /local
+/nobackup
 /
 /docker-*
 *.log

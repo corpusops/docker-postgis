@@ -312,6 +312,33 @@ corpusops/postgis-bare/alpine\
  corpusops/postgis-bare/10-2.4-alpine\
  corpusops/postgis-bare/10-2.5-alpine\
  corpusops/postgis-bare/11-2.5-alpine::30
+corpusops/pgrouting-bare/11-2.5-2.6\
+ corpusops/pgrouting-bare/10-2.5-2.6\
+ corpusops/pgrouting-bare/10-2.4-2.6\
+ corpusops/pgrouting-bare/11-2.5-2.5\
+ corpusops/pgrouting-bare/11-2.5-2.4\
+ corpusops/pgrouting-bare/10-2.5-2.5\
+ corpusops/pgrouting-bare/10-2.5-2.4\
+ corpusops/pgrouting-bare/10-2.4-2.5\
+ corpusops/pgrouting-bare/10-2.4-2.4\
+ corpusops/pgrouting-bare/9.6-2.5-2.6\
+ corpusops/pgrouting-bare/9.6-2.4-2.6\
+ corpusops/pgrouting-bare/9.5-2.5-2.6\
+ corpusops/pgrouting-bare/9.5-2.4-2.6\
+ corpusops/pgrouting-bare/9.4-2.5-2.6\
+ corpusops/pgrouting-bare/9.4-2.4-2.6::30
+corpusops/pgrouting-bare/9.6-2.5-2.5\
+ corpusops/pgrouting-bare/9.6-2.5-2.4\
+ corpusops/pgrouting-bare/9.6-2.4-2.5\
+ corpusops/pgrouting-bare/9.6-2.4-2.4\
+ corpusops/pgrouting-bare/9.5-2.5-2.5\
+ corpusops/pgrouting-bare/9.5-2.5-2.4\
+ corpusops/pgrouting-bare/9.5-2.4-2.5\
+ corpusops/pgrouting-bare/9.5-2.4-2.4\
+ corpusops/pgrouting-bare/9.4-2.5-2.5\
+ corpusops/pgrouting-bare/9.4-2.5-2.4\
+ corpusops/pgrouting-bare/9.4-2.4-2.5\
+ corpusops/pgrouting-bare/9.4-2.4-2.4::30
 "
 SKIP_REFRESH_ANCETORS=${SKIP_REFRESH_ANCETORS-}
 POSTGIS_MINOR_TAGS="
@@ -351,8 +378,7 @@ PGROUTING_MINOR_TAGS="
 10-2.5-2.5
 10-2.5-2.6
 11-2.5-2.4
-11-2.5-2.5"
-PGROUTING_MINOR_TAGS="
+11-2.5-2.5
 11-2.5-2.6
 "
 POSTGRES_MAJOR="9 10 11"
@@ -360,6 +386,7 @@ packagesUrlJessie='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/mai
 packagesJessie="$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+PGROUTING_REPO="${PGROUTING_REPO:-"https://salsa.debian.org/debian-gis-team/pgrouting.git"}"
 
 
 declare -A registry_tokens
@@ -640,7 +667,6 @@ do_refresh_ancestors() {
     if [ ! -e docker-pgrouting ];then git clone $PGROUTING_URL docker-pgrouting;fi
     ( cd docker-pgrouting && git fetch --all && git reset --hard origin/master; )
     cp -vf docker-postgis/*postgis*.sh .
-    cp -vf $(find docker-pgrouting -name "initdb*sh"|sort -V|tail -n 1) .
     chmod +x *sh
     chmod -x initdb-*.sh
 }
@@ -713,26 +739,34 @@ do_refresh_postgis() {
 }
 
 do_refresh_pgrouting() {
-    PGROUTING_TAGS="$(git ls-remote -q  --refs --tags https://github.com/pgRouting/pgrouting.git|sed -e "s/.*tags\///g"|egrep "v[0-9]"|sort -V)"
+    # in the form
+    # debian/2.6.2-1
+    # upstream/2.0.0
+    PGROUTING_TAGS="$(git ls-remote -q  --refs --tags "$PGROUTING_REPO"|sed -re 's!.*tags/((upstream|debian)/)?!\1!g'|egrep "[0-9]"|awk '!seen[$0]++'|sort -V)"
+    PGROUTING_DEBIAN_TAGS="$(echo "$PGROUTING_TAGS"|grep debian|sed -re "s|.*/||g")"
     for version in $PGROUTING_MINOR_TAGS;do
         IFS=- read pg_major postgis_major pgrouting_major <<< "$version"
-        tpgrouting_minor=$(echo "$PGROUTING_TAGS"|egrep -v "^v$postgis_major"|sort -V|tail -n1)
-        pgrouting_minor="${tpgrouting_minor:1}"
-        if [[ -z $pgrouting_minor ]];then
+        tpgrouting_version=$(echo "$PGROUTING_TAGS"|egrep "^debian/$pgrouting_major"|sort -V|tail -n1)
+        pgrouting_debian_version="${tpgrouting_version}"
+        pgrouting_version="${tpgrouting_version//*\//}"
+        if [[ -z $pgrouting_debian_version ]];then
             echo "No tag for $version"
             exit 1
         fi
         img="corpusops/pgrouting-bare/$version"
         for j in $img;do if [ ! -e "$j" ];then mkdir -p "$j";fi;done
-        cachedsrcVersion="cached_pgrouting_sha_${pgrouting_minor}"
-        if [ -e "$cachedsrcVersion" ];then
-            srcSha256="$(cat $cachedsrcVersion)"
-        else
-            srcSha256="$(curl -sSL "https://github.com/postgis/postgis/archive/$srcVersion.tar.gz" | sha256sum | awk '{ print $1 }')"
-            echo "$srcSha256" > "$cachedsrcVersion"
-        fi
+        set -ex
         cp -vf Dockerfile.pgrouting.template        "$img/Dockerfile"
         cat Dockerfile.labels Dockerfile.args >> "$img/Dockerfile"
+        sed -i -r \
+            -e 's/%%PG_MAJOR%%/'$pg_major'/g' \
+            -e 's/%%POSTGIS_MAJOR%%/'$postgis_major'/g' \
+            -e 's!%%PGROUTING_REPO%%!'$PGROUTING_REPO'!g' \
+            -e 's!%%PGROUTING_TAG%%!'$PGROUTING_DEBIAN_TAG'!g' \
+            -e 's/%%PGROUTING_MAJOR%%/'$pgrouting_major'/g' \
+            -e 's!%%PGROUTING_VERSION%%!'$pgrouting_version'!g' \
+            -e 's!%%PGROUTING_DEBIAN_VERSION%%!'$pgrouting_debian_version'!g' \
+            "$img/Dockerfile"
     done
 }
 
