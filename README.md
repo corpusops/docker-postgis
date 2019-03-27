@@ -22,6 +22,8 @@
       Please refer to [online tags](https://hub.docker.com/r/corpusops/postgis-bare/tags).
         - eg: ``corpusops/postgis-bare:9.5-2.4-alpine``
     - 9 (copy of latest 9 tag)
+        - 9.0-2.1
+        - 9.1-2.2
         - 9.2-2.2
         - 9.2-2.2
         - 9.2-2.3
@@ -34,6 +36,10 @@
         - 9.5-2.5
         - 9.6-2.4
         - 9.6-2.5
+        - 9.0 (copy of latest 9.1-2.1 tag)
+        - 9.1 (copy of latest 9.1-2.2 tag)
+        - 9.2 (copy of latest 9.2-2.3 tag)
+        - 9.3 (copy of latest 9.3-2.4 tag)
         - 9.4 (copy of latest 9.5-2.5 tag)
         - 9.5 (copy of latest 9.4-2.5 tag)
         - 9.6 (copy of latest 9.6-2.5 tag)
