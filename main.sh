@@ -775,12 +775,13 @@ record_build_image() {
     local cmd="$cmd      echo \"${RED}$image/$df build: Failing after $retries retries${NORMAL}\" >&2"
     local cmd="$cmd      && false;fi"
     local run="echo -e \"${RED}$dbuild${NORMAL}\" && $cmd"
+
+    local release_tags="$itag"
+    for alt_tag in ${duplicated_tags[$itag]};do
+        release_tags="$release_tags $alt_tag"
+        run="$run && docker tag $itag $alt_tag"
+    done
     if [[ -n "$DO_RELEASE" ]];then
-        release_tags="$itag"
-        for alt_tag in ${duplicated_tags[$itag]};do
-            release_tags="$release_tags $alt_tag"
-            run="$run && docker tag $itag $alt_tag"
-        done
         run="$run && ./local/corpusops.bootstrap/hacking/docker_release $release_tags"
     fi
     book="$(printf "$run\n${book}" )"
