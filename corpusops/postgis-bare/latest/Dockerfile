@@ -1,6 +1,9 @@
 FROM postgres:11
+ARG NONINTERACTIVE=y
 ADD helpers/ /tmp/copshelpers/
-RUN cd /tmp/copshelpers && ./up.sh
+RUN cd /tmp/copshelpers && ./up.sh \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
 MAINTAINER Mike Dillon <mike@appropriate.io>
 
 ENV POSTGIS_MAJOR 2.5
