@@ -1,4 +1,5 @@
 FROM postgres:11-alpine
+
 MAINTAINER Régis Belson <me@regisbelson.fr>
 
 ENV POSTGIS_VERSION 2.5.2

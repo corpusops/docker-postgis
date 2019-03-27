@@ -1,0 +1,2 @@
+ADD helpers/ /tmp/copshelpers/
+RUN cd /tmp/copshelpers && ./up.sh

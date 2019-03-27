@@ -547,8 +547,6 @@ is_skipped() {
     fi
     return $ret
 }
-# echo $(set -x && is_skipped library/redis/3.0.4-32bit;echo $?)
-# exit 1
 
 skip_local() {
     egrep -v "(.\/)?local"
@@ -631,12 +629,15 @@ do_clean_tags() {
 
 do_refresh_ancestors() {
     if [[ -n $SKIP_REFRESH_ANCETORS ]];then return;fi
+    IMAGES_URL="https://github.com/corpusops/docker-images"
+    if [ ! -e docker-images ];then git clone $IMAGES_URL docker-images;fi
     POSTGIS_URL="https://github.com/appropriate/docker-postgis.git"
     if [ ! -e docker-postgis ];then git clone $POSTGIS_URL docker-postgis;fi
     ( cd docker-postgis && git fetch --all && git reset --hard origin/master; )
     cp -vf docker-postgis/*postgis*.sh .
     chmod +x *sh
     chmod -x initdb-*.sh
+    rsync -azv --delete docker-images/helpers/ helpers/
 }
 
 do_refresh_postgis() {
@@ -666,8 +667,18 @@ do_refresh_postgis() {
         fi
         cp -vf Dockerfile.postgis.template        "$img/Dockerfile"
         cp -vf docker-postgis/Dockerfile.alpine.template "$imgalpine/Dockerfile"
-        cat Dockerfile.labels Dockerfile.args >> "$img/Dockerfile"
-        cat Dockerfile.labels Dockerfile.args >> "$imgalpine/Dockerfile"
+        dockerfile="$(: \
+            && egrep    "FROM" "$img/Dockerfile" \
+            && cat Dockerfile.pre \
+            && egrep -v "FROM" "$img/Dockerfile" \
+            && cat Dockerfile.post)"
+        echo "$dockerfile" > "$img/Dockerfile"
+        adockerfile="$(: \
+            && egrep    "FROM" "$imgalpine/Dockerfile" \
+            && cat Dockerfile.alpine.pre \
+            && egrep -v "FROM" "$imgalpine/Dockerfile" \
+            && cat Dockerfile.alpine.post)"
+        echo "$adockerfile" > "$imgalpine/Dockerfile"
         if ( echo $imgalpine | egrep -q "9.3.*alpine" ) && ( grep -vq jsonb.patch "$imgalpine/Dockerfile" );then
             sed -i -r \
                 -e '/cd \/usr\/src\/postgis/ a\     && set -o pipefail && bzip2 -dck ../jsonb.patch.bz2|patch -Np1 \\' \

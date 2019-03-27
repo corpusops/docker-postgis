@@ -1,4 +1,6 @@
 FROM postgres:9.2
+ADD helpers/ /tmp/copshelpers/
+RUN cd /tmp/copshelpers && ./up.sh
 MAINTAINER Mike Dillon <mike@appropriate.io>
 
 ENV POSTGIS_MAJOR 2.3

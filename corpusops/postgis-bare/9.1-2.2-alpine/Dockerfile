@@ -1,4 +1,5 @@
 FROM postgres:9.1-alpine
+
 MAINTAINER Régis Belson <me@regisbelson.fr>
 
 ENV POSTGIS_VERSION 2.2.2

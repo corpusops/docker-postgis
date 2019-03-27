@@ -1,1 +1,2 @@
 LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
+ARG DOCKER_IMAGES_COMMIT=master

@@ -1,4 +1,5 @@
 FROM postgres:9.3-alpine
+
 MAINTAINER Régis Belson <me@regisbelson.fr>
 ADD jsonb.patch.bz2 /usr/src
 
