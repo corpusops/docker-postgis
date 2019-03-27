@@ -266,14 +266,9 @@ find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.6
 BATCHED_IMAGES="\
-corpusops/postgis-bare/latest\
- corpusops/postgis-bare/11\
- corpusops/postgis-bare/10\
- corpusops/postgis-bare/9\
- corpusops/postgis-bare/9.0\
- corpusops/postgis-bare/9.1\
- corpusops/postgis-bare/9.2\
- corpusops/postgis-bare/9.3\
+corpusops/postgis-bare/11-2.5\
+ corpusops/postgis-bare/10-2.4\
+ corpusops/postgis-bare/10-2.5\
  corpusops/postgis-bare/9.0-2.1\
  corpusops/postgis-bare/9.1-2.1\
  corpusops/postgis-bare/9.1-2.2\
@@ -282,36 +277,24 @@ corpusops/postgis-bare/latest\
  corpusops/postgis-bare/9.3-2.3\
  corpusops/postgis-bare/9.3-2.4\
  corpusops/postgis-bare/9.4-2.3\
- corpusops/postgis-bare/9.4-2.4\
  corpusops/postgis-bare/9.4-2.5\
  corpusops/postgis-bare/9.5-2.4\
  corpusops/postgis-bare/9.5-2.5\
  corpusops/postgis-bare/9.6-2.4\
  corpusops/postgis-bare/9.6-2.5\
- corpusops/postgis-bare/10-2.4\
- corpusops/postgis-bare/10-2.5\
- corpusops/postgis-bare/11-2.5::30
-corpusops/postgis-bare/alpine\
- corpusops/postgis-bare/11-alpine\
- corpusops/postgis-bare/10-alpine\
- corpusops/postgis-bare/9-alpine\
- corpusops/postgis-bare/9.2-alpine\
- corpusops/postgis-bare/9.3-alpine\
- corpusops/postgis-bare/9.4-alpine\
+ corpusops/postgis-bare/9.4-2.4::30
+corpusops/postgis-bare/11-2.5-alpine\
+ corpusops/postgis-bare/10-2.4-alpine\
+ corpusops/postgis-bare/10-2.5-alpine\
  corpusops/postgis-bare/9.2-2.3-alpine\
  corpusops/postgis-bare/9.3-2.3-alpine\
  corpusops/postgis-bare/9.3-2.4-alpine\
  corpusops/postgis-bare/9.4-2.4-alpine\
  corpusops/postgis-bare/9.4-2.5-alpine\
- corpusops/postgis-bare/9.5-alpine\
  corpusops/postgis-bare/9.5-2.4-alpine\
  corpusops/postgis-bare/9.5-2.5-alpine\
- corpusops/postgis-bare/9.6-alpine\
  corpusops/postgis-bare/9.6-2.4-alpine\
- corpusops/postgis-bare/9.6-2.5-alpine\
- corpusops/postgis-bare/10-2.4-alpine\
- corpusops/postgis-bare/10-2.5-alpine\
- corpusops/postgis-bare/11-2.5-alpine::30
+ corpusops/postgis-bare/9.6-2.5-alpine::30
 "
 SKIP_REFRESH_ANCETORS=${SKIP_REFRESH_ANCETORS-}
 POSTGIS_MINOR_TAGS="
@@ -360,6 +343,7 @@ packagesJessie="$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 
+declare -A duplicated_tags
 declare -A registry_tokens
 declare -A registry_services
 
@@ -688,32 +672,6 @@ do_refresh_postgis() {
     sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
         sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$srcVersion"'/g; s/%%POSTGIS_SHA256%%/'"$srcSha256"'/g' "$imgalpine/Dockerfile"
     done
-    rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9.6/
-    rsync -azv --delete corpusops/postgis-bare/9.5-2.5/        corpusops/postgis-bare/9.5/
-    rsync -azv --delete corpusops/postgis-bare/9.4-2.5/        corpusops/postgis-bare/9.4/
-    rsync -azv --delete corpusops/postgis-bare/9.3-2.4/        corpusops/postgis-bare/9.3/
-    rsync -azv --delete corpusops/postgis-bare/9.2-2.3/        corpusops/postgis-bare/9.2/
-    rsync -azv --delete corpusops/postgis-bare/9.1-2.2/        corpusops/postgis-bare/9.1/
-    rsync -azv --delete corpusops/postgis-bare/9.0-2.1/        corpusops/postgis-bare/9.0/
-
-    rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9.6-alpine/
-    rsync -azv --delete corpusops/postgis-bare/9.5-2.5-alpine/ corpusops/postgis-bare/9.5-alpine/
-    rsync -azv --delete corpusops/postgis-bare/9.4-2.5-alpine/ corpusops/postgis-bare/9.4-alpine/
-    rsync -azv --delete corpusops/postgis-bare/9.3-2.4-alpine/ corpusops/postgis-bare/9.3-alpine/
-    rsync -azv --delete corpusops/postgis-bare/9.2-2.3-alpine/ corpusops/postgis-bare/9.2-alpine/
-
-    rsync -azv --delete corpusops/postgis-bare/9.6-2.5/        corpusops/postgis-bare/9/
-    rsync -azv --delete corpusops/postgis-bare/9.6-2.5-alpine/ corpusops/postgis-bare/9-alpine/
-
-    rsync -azv --delete corpusops/postgis-bare/10-2.5/         corpusops/postgis-bare/10/
-    rsync -azv --delete corpusops/postgis-bare/10-2.5-alpine/  corpusops/postgis-bare/10-alpine/
-
-    rsync -azv --delete corpusops/postgis-bare/11-2.5/         corpusops/postgis-bare/11/
-    rsync -azv --delete corpusops/postgis-bare/11-2.5-alpine/  corpusops/postgis-bare/11-alpine/
-
-    rsync -azv --delete corpusops/postgis-bare/11/             corpusops/postgis-bare/latest/
-    rsync -azv --delete corpusops/postgis-bare/11-alpine/      corpusops/postgis-bare/alpine/
-
     rm -rf corpusops/postgis-bare/9.0-2.1-alpine
 }
 
@@ -762,6 +720,39 @@ get_docker_squash_args() {
     echo $DOCKER_DO_SQUASH
 }
 
+set_global_tag() {
+    val=${duplicated_tags[$1]}
+    if [[ -n $val ]];then
+        val="$val $2"
+    else
+        val="$2"
+    fi
+    duplicated_tags[$1]=$val
+}
+
+set_global_tags() {
+    set_global_tag corpusops/postgis-bare:9.6-2.5        corpusops/postgis-bare:9.6
+    set_global_tag corpusops/postgis-bare:9.5-2.5        corpusops/postgis-bare:9.5
+    set_global_tag corpusops/postgis-bare:9.4-2.5        corpusops/postgis-bare:9.4
+    set_global_tag corpusops/postgis-bare:9.3-2.4        corpusops/postgis-bare:9.3
+    set_global_tag corpusops/postgis-bare:9.2-2.3        corpusops/postgis-bare:9.2
+    set_global_tag corpusops/postgis-bare:9.1-2.2        corpusops/postgis-bare:9.1
+    set_global_tag corpusops/postgis-bare:9.0-2.1        corpusops/postgis-bare:9.0
+    set_global_tag corpusops/postgis-bare:9.6-2.5-alpine corpusops/postgis-bare:9.6-alpine
+    set_global_tag corpusops/postgis-bare:9.5-2.5-alpine corpusops/postgis-bare:9.5-alpine
+    set_global_tag corpusops/postgis-bare:9.4-2.5-alpine corpusops/postgis-bare:9.4-alpine
+    set_global_tag corpusops/postgis-bare:9.3-2.4-alpine corpusops/postgis-bare:9.3-alpine
+    set_global_tag corpusops/postgis-bare:9.2-2.3-alpine corpusops/postgis-bare:9.2-alpine
+    set_global_tag corpusops/postgis-bare:9.6-2.5        corpusops/postgis-bare:9
+    set_global_tag corpusops/postgis-bare:9.6-2.5-alpine corpusops/postgis-bare:9-alpine
+    set_global_tag corpusops/postgis-bare:10-2.5         corpusops/postgis-bare:10
+    set_global_tag corpusops/postgis-bare:10-2.5-alpine  corpusops/postgis-bare:10-alpine
+    set_global_tag corpusops/postgis-bare:11-2.5         corpusops/postgis-bare:11
+    set_global_tag corpusops/postgis-bare:11-2.5-alpine  corpusops/postgis-bare:11-alpine
+    set_global_tag corpusops/postgis-bare:11             corpusops/postgis-bare:latest
+    set_global_tag corpusops/postgis-bare:11-alpine      corpusops/postgis-bare:alpine
+}
+
 record_build_image() {
     # library/ubuntu/latest / mdillon/postgis/latest
     local image=$1
@@ -785,7 +776,12 @@ record_build_image() {
     local cmd="$cmd      && false;fi"
     local run="echo -e \"${RED}$dbuild${NORMAL}\" && $cmd"
     if [[ -n "$DO_RELEASE" ]];then
-        run="$run && ./local/corpusops.bootstrap/hacking/docker_release $itag"
+        release_tags="$itag"
+        for alt_tag in ${duplicated_tags[$itag]};do
+            release_tags="$release_tags $alt_tag"
+            run="$run && docker tag $itag $alt_tag"
+        done
+        run="$run && ./local/corpusops.bootstrap/hacking/docker_release $release_tags"
     fi
     book="$(printf "$run\n${book}" )"
 }
@@ -1018,6 +1014,7 @@ do_usage() {
 }
 
 do_main() {
+    set_global_tags
     local args=${@:-usage}
     local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_postgis"
     actions="@($actions)"
