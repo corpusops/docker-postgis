@@ -50,6 +50,3 @@
         - 11-2.5
     - latest: (copy of latest 11 tag)
     - alpine: (copy of latest 11 alpine tag)
-
-## Support development
-- [paypal](https://paypal.me/kiorky)
