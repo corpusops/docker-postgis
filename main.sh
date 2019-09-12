@@ -651,6 +651,7 @@ do_refresh_postgis() {
         fi
         cp -vf Dockerfile.postgis.template        "$img/Dockerfile"
         cp -vf docker-postgis/Dockerfile.alpine.template "$imgalpine/Dockerfile"
+        sed -i -re "s/proj4/proj/g" "$imgalpine/Dockerfile"
         dockerfile="$(: \
             && egrep    "FROM" "$img/Dockerfile" \
             && cat Dockerfile.pre \
