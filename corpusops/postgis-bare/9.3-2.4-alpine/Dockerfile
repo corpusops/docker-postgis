@@ -38,7 +38,7 @@ RUN set -ex \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
         gdal-dev \
         geos-dev \
-        proj4-dev \
+        proj-dev \
         protobuf-c-dev \
     && cd /usr/src/postgis \
      && set -o pipefail && bzip2 -dck ../jsonb.patch.bz2|patch -Np1 \
@@ -56,7 +56,7 @@ RUN set -ex \
         --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \        
         geos \
         gdal \
-        proj4 \
+        proj \
         protobuf-c \
     && cd / \
     && rm -rf /usr/src/postgis \
