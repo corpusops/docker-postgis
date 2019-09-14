@@ -650,8 +650,8 @@ do_refresh_postgis() {
             echo "$srcSha256" > "$cachedsrcVersion"
         fi
         cp -vf Dockerfile.postgis.template        "$img/Dockerfile"
+        cp -vf patch* "$img/"
         cp -vf docker-postgis/Dockerfile.alpine.template "$imgalpine/Dockerfile"
-        sed -i -re "s/proj4/proj/g" "$imgalpine/Dockerfile"
         dockerfile="$(: \
             && egrep    "FROM" "$img/Dockerfile" \
             && cat Dockerfile.pre \
@@ -663,7 +663,23 @@ do_refresh_postgis() {
             && cat Dockerfile.alpine.pre \
             && egrep -v "FROM" "$imgalpine/Dockerfile" \
             && cat Dockerfile.alpine.post)"
-        echo "$adockerfile" > "$imgalpine/Dockerfile"
+        adockerfile=$(python << EOF
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+import re, sys
+data = '''${adockerfile//\\/\\\\}'''
+data = data.replace('./autogen.sh', ''': end
+ADD patch-configure.sh /
+RUN set -ex && cd /usr/src/postgis && /patch-configure.sh configure* && ./autogen.sh \
+&& export CFLAGS="\$CFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" \
+&& export CPPFLAGS="\$CFLAGS" && CPP_FLAGS="\$CFLAGS"''')
+data = data.replace('proj4', 'proj')
+data = data.replace('json-c-dev ', 'json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat')
+data = data.replace('json-c  ', 'json-c  sqlite-libs curl libcurl sqlite-libs expat')
+print(data)
+EOF
+)
+    echo "$adockerfile" > "$imgalpine/Dockerfile"
         if ( echo $imgalpine | egrep -q "9.3.*alpine" ) && ( grep -vq jsonb.patch "$imgalpine/Dockerfile" );then
             sed -i -r \
                 -e '/cd \/usr\/src\/postgis/ a\     && set -o pipefail && bzip2 -dck ../jsonb.patch.bz2|patch -Np1 \\' \

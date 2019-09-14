@@ -27,7 +27,7 @@ RUN set -ex \
         autoconf \
         automake \
         g++ \
-        json-c-dev \
+        json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat\
         libtool \
         libxml2-dev \
         make \
@@ -42,7 +42,10 @@ RUN set -ex \
         protobuf-c-dev \
     && cd /usr/src/postgis \
      && set -o pipefail && bzip2 -dck ../jsonb.patch.bz2|patch -Np1 \
-    && ./autogen.sh \
+    && : end
+ADD patch-configure.sh /
+RUN set -ex && cd /usr/src/postgis && /patch-configure.sh configure* && ./autogen.sh && export CFLAGS="$CFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" && export CPPFLAGS="$CFLAGS" && CPP_FLAGS="$CFLAGS" \
+     && set -o pipefail && bzip2 -dck ../jsonb.patch.bz2|patch -Np1 \
 # configure options taken from:
 # https://anonscm.debian.org/cgit/pkg-grass/postgis.git/tree/debian/rules?h=jessie
     && ./configure \
