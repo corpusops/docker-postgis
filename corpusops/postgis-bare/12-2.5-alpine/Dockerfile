@@ -27,7 +27,7 @@ RUN set -ex \
         autoconf \
         automake \
         file \
-        json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat\
+        json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat pkgconfig\
         libtool \
         libxml2-dev \
         make \

@@ -312,13 +312,13 @@ NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
 BATCHED_IMAGES="\
 corpusops/postgis-bare/13-3\
- corpusops/postgis-bare/13-2.5\
  corpusops/postgis-bare/12-3\
  corpusops/postgis-bare/12-2.5\
  corpusops/postgis-bare/11-3\
  corpusops/postgis-bare/11-2.5\
  corpusops/postgis-bare/10-2.4\
  corpusops/postgis-bare/10-2.5\
+ corpusops/postgis-bare/10-3\
  corpusops/postgis-bare/9.0-2.1\
  corpusops/postgis-bare/9.1-2.1\
  corpusops/postgis-bare/9.1-2.2\
@@ -334,13 +334,13 @@ corpusops/postgis-bare/13-3\
  corpusops/postgis-bare/9.6-2.5\
  corpusops/postgis-bare/9.4-2.4::30
 corpusops/postgis-bare/13-3-alpine\
- corpusops/postgis-bare/13-2.5-alpine\
  corpusops/postgis-bare/12-3-alpine\
  corpusops/postgis-bare/12-2.5-alpine\
  corpusops/postgis-bare/11-3-alpine\
  corpusops/postgis-bare/11-2.5-alpine\
  corpusops/postgis-bare/10-2.4-alpine\
  corpusops/postgis-bare/10-2.5-alpine\
+ corpusops/postgis-bare/10-3-alpine\
  corpusops/postgis-bare/9.2-2.3-alpine\
  corpusops/postgis-bare/9.3-2.3-alpine\
  corpusops/postgis-bare/9.3-2.4-alpine\
@@ -360,10 +360,10 @@ POSTGIS_MINOR_TAGS="
 9.3-2.3 9.3-2.4
 9.4-2.3 9.4-2.4 9.5-2.4 9.6-2.4
 9.4-2.5 9.5-2.5 9.6-2.5
-10-2.4 10-2.5
+10-2.4 10-2.5 10-3
 11-2.5 11-3
 12-2.5 12-3
-13-2.5 13-3
+13-3
 "
 PGROUTING_MINOR_TAGS="
 9.4-2.4-2.4
@@ -394,7 +394,7 @@ PGROUTING_MINOR_TAGS="
 11-2.5-2.5
 11-2.5-2.6
 "
-POSTGRES_MAJOR="9 10 11"
+POSTGRES_MAJOR="9 10 11 12 13"
 packagesUrlJessie='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
@@ -736,8 +736,8 @@ RUN set -ex && cd /usr/src/postgis && /patch-configure.sh configure* && ./autoge
 && export CFLAGS="\$CFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" \
 && export CPPFLAGS="\$CFLAGS" && CPP_FLAGS="\$CFLAGS"''')
 data = data.replace('proj4', 'proj')
-data = data.replace('json-c-dev ', 'json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat')
-data = data.replace('json-c  ', 'json-c  sqlite-libs curl libcurl sqlite-libs expat')
+data = data.replace('json-c-dev ', 'json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat pkgconfig')
+data = data.replace('json-c  ', 'json-c  sqlite-libs curl libcurl sqlite-libs expat pkgconfig')
 print(data)
 EOF
 )

@@ -1,4 +1,4 @@
-FROM postgres:13
+FROM postgres:10
 ARG NONINTERACTIVE=y
 ADD helpers/ /tmp/copshelpers/
 RUN cd /tmp/copshelpers && ./up.sh \
@@ -6,8 +6,8 @@ RUN cd /tmp/copshelpers && ./up.sh \
     && rm -rf /var/lib/apt/lists/*
 MAINTAINER Mike Dillon <mike@appropriate.io>
 
-ENV POSTGIS_MAJOR 2.5
-ENV POSTGIS_VERSION 2.5.5+dfsg-1.pgdg90+2
+ENV POSTGIS_MAJOR 3
+ENV POSTGIS_VERSION 3.1.0+dfsg-1.pgdg90+1
 
 RUN apt-get update \
       && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
