@@ -396,9 +396,9 @@ PGROUTING_MINOR_TAGS="
 "
 POSTGRES_MAJOR="9 10 11 12 13"
 packagesUrlJessie='http://apt.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
-packagesJessie="$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
-packagesStretch="$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 
 declare -A duplicated_tags
 declare -A registry_tokens
@@ -704,7 +704,7 @@ do_refresh_postgis() {
         [ -z "$fullVersion" ] && { echo >&2 "Unable to find package for PostGIS $postgis_major on Postgres $pg_major"; exit 1; }
         for j in $img $imgalpine;do if [ ! -e "$j" ];then mkdir -p "$j";fi;done
         srcVersion="${fullVersion%%+*}"
-        cachedsrcVersion="cached_postgis_sha_${srcVersion}"
+        cachedsrcVersion="local/cached_postgis_sha_${srcVersion}"
         if [ -e "$cachedsrcVersion" ];then
             srcSha256="$(cat $cachedsrcVersion)"
         else
