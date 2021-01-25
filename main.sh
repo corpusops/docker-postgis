@@ -403,6 +403,11 @@ packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g
 declare -A duplicated_tags
 declare -A registry_tokens
 declare -A registry_services
+declare -A postgis_alpine_vers
+postgis_alpine_vers[2.3]="2.3.11"
+postgis_alpine_vers[2.3.11]="98b4bde783d6d2cda01ac268317ef83210370253f41c9dc937adeea2aa443dc3"
+postgis_alpine_vers[2.4]="2.4.9"
+postgis_alpine_vers[2.4.9]="77ba24bf8fbbfa65881d7d24bd6379f2001fff781d6ff512590bfaf16e605288"
 
 is_on_build() { echo "$@" | egrep -iq "on.*build"; }
 slashcount() { local _slashcount="$(echo "${@}"|sed -e 's![^/]!!g')";echo ${#_slashcount}; }
@@ -748,10 +753,22 @@ EOF
                 -e '/MAINTAINER/ a ADD jsonb.patch.bz2 /usr/src' \
                 "$imgalpine/Dockerfile"
         fi
+        if ( echo $imgalpine | egrep -q "2\.3-alpine" );then
+            sed -i -re 's/llvm10/llvm9/g' "$imgalpine/Dockerfile"
+        fi
+    cpostgis_alpine_version=${srcVersion}
+    cpostgis_alpine_sha=${srcSha256}
+    if [[ -v "postgis_alpine_vers[$postgis_major]" ]];then
+        cpostgis_alpine_version=${postgis_alpine_vers[$postgis_major]}
+        cpostgis_alpine_sha=${postgis_alpine_vers[$cpostgis_alpine_version]}
+    fi
     sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
-        sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$srcVersion"'/g; s/%%POSTGIS_SHA256%%/'"$srcSha256"'/g' "$imgalpine/Dockerfile"
+    sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$cpostgis_alpine_version"'/g; s/%%POSTGIS_SHA256%%/'"$cpostgis_alpine_sha"'/g' "$imgalpine/Dockerfile"
     done
     rm -rf corpusops/postgis-bare/9.0-2.1-alpine
+    rm -rf corpusops/postgis-bare/9*-2.3-alpine
+    rm -rf corpusops/postgis-bare/9*-2.3-alpine
+    rm -rf corpusops/postgis-bare/9*-2.3-alpine
 }
 
 #  refresh_images $args: refresh images files
