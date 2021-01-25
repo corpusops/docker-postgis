@@ -3,8 +3,8 @@ FROM postgres:10-alpine
 
 LABEL maintainer="PostGIS Project - https://postgis.net"
 
-ENV POSTGIS_VERSION 2.4.4
-ENV POSTGIS_SHA256 0dff4902556ad45430e2b85dbe7e9baa758c6eb0bfd5ff6948f478beddd56b67
+ENV POSTGIS_VERSION 2.4.9
+ENV POSTGIS_SHA256 77ba24bf8fbbfa65881d7d24bd6379f2001fff781d6ff512590bfaf16e605288
 
 RUN set -ex \
     \
