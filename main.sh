@@ -256,40 +256,7 @@ IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(mini
 
 
 default_images="
-appbaseio/dejavu
-minio/minio
-minio/mc
-minio/doctor
-library/memcached
-library/alpine
-library/centos
-library/debian
-library/fedora
-library/golang
-library/mysql
-library/mariadb
-library/nginx
-library/redis
-library/rabbitmq
-library/node
-library/php
-library/postgres
-library/python
-library/traefik
-library/ruby
-library/ubuntu
-library/opensuse
-library/solr
-library/mongo
-library/elasticsearch
-opensuse/tumbleweed
-opensuse/leap
-corpusops/pgrouting-bare
 corpusops/postgis-bare
-mailhog/mailhog
-mailu/postfix
-mailu/rspamd
-seafileltd/seafile-mc
 "
 
 find_top_node_() {
