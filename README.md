@@ -1,7 +1,7 @@
 # Docker postgis images
 - This repository provides tags for the following docker images:
     - [corpusops/postgis-bare](https://hub.docker.com/r/corpusops/postgis-bare)
-- The additional tags from [corpusops/docker-images](https://github.com/corpusops/docker-images) are based on those images:
+- The additional tags from [corpusops/docker-postgresql](https://github.com/corpusops/docker-postgresql) are based on those images:
     - [corpusops/postgis](https://hub.docker.com/r/corpusops/postgis)
 
 
@@ -48,5 +48,10 @@
         - 10-2.5
     - 11 (copy of latest 11 tag)
         - 11-2.5
+    - 12 (copy of latest 12 tag)
+        - 12-2.5
+        - 12-3
+    - 13 (copy of latest 13 tag)
+        - 13-3
     - latest: (copy of latest 11 tag)
     - alpine: (copy of latest 11 alpine tag)
