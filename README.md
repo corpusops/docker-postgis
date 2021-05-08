@@ -1,8 +1,10 @@
 # Docker postgis images
 - This repository provides tags for the following docker images:
     - [corpusops/postgis-bare](https://hub.docker.com/r/corpusops/postgis-bare)
-- The additional tags from [corpusops/docker-postgresql](https://github.com/corpusops/docker-postgresql) are based on those images:
-    - [corpusops/postgis](https://hub.docker.com/r/corpusops/postgis)
+- The additional tags from  [corpusops/docker-postgresql](https://github.com/corpusops/docker-postgresql) & [corpusops/docker-pgrouting](https://github.com/corpusops/docker-pgrouting) are based on those images:
+    - pgrouting/ [corpusops/pgrouting-bare](https://hub.docker.com/r/corpusops/pgrouting-bare)
+    - postgresql/ [corpusops/postgis](https://hub.docker.com/r/corpusops/postgis)
+    - postgresql/ [corpusops/pgrouting](https://hub.docker.com/r/corpusops/pgrouting)
 
 
 - Those images are based on
