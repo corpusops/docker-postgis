@@ -3,8 +3,8 @@ FROM postgres:9.4-alpine
 
 LABEL maintainer="PostGIS Project - https://postgis.net"
 
-ENV POSTGIS_VERSION 2.5.3
-ENV POSTGIS_SHA256 402323c83d97f3859bc9083345dd687f933c261efe0830e1262c20c12671f794
+ENV POSTGIS_VERSION 2.5.5
+ENV POSTGIS_SHA256 24b15ee36f3af02015da0e92a18f9046ea0b4fd24896196c8e6c2aa8e4b56baa
 
 RUN set -ex \
     \
@@ -37,7 +37,7 @@ RUN set -ex \
         gcc \
         gdal-dev \
         geos-dev \
-        llvm10-dev \
+        llvm9-dev \
         proj-dev \
         protobuf-c-dev \
     && cd /usr/src/postgis \
