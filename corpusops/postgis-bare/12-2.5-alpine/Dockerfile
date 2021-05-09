@@ -27,7 +27,7 @@ RUN set -ex \
         autoconf \
         automake \
         file \
-        json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat pkgconfig\
+        json-c-dev curl-dev expat-dev sqlite-libs pkgconfig shadow bash\
         libtool \
         libxml2-dev \
         make \
@@ -41,7 +41,7 @@ RUN set -ex \
         proj-dev \
         protobuf-c-dev \
     && cd /usr/src/postgis \
-    && : end
+    && usermod -s /bin/sh postgres && : end
 ADD patch-configure.sh /
 RUN set -ex && cd /usr/src/postgis && /patch-configure.sh configure* && ./autogen.sh && export CFLAGS="$CFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" && export CPPFLAGS="$CFLAGS" && CPP_FLAGS="$CFLAGS" \
 # configure options taken from:
@@ -53,11 +53,11 @@ RUN set -ex && cd /usr/src/postgis && /patch-configure.sh configure* && ./autoge
 # regress check
     && mkdir /tempdb \
     && chown -R postgres:postgres /tempdb \
-    && su postgres -c 'pg_ctl -D /tempdb init' \
-    && su postgres -c 'pg_ctl -D /tempdb start' \
+    && su postgres -lc 'pg_ctl -D /tempdb init' \
+    && su postgres -lc 'pg_ctl -D /tempdb start' \
     && cd regress \
     && make -j$(nproc) check RUNTESTFLAGS=--extension PGUSER=postgres \
-    && su postgres -c 'pg_ctl -D /tempdb --mode=immediate stop' \
+    && su postgres -lc 'pg_ctl -D /tempdb --mode=immediate stop' \
     && rm -rf /tempdb \
     && rm -rf /tmp/pgis_reg \
 # add .postgis-rundeps

@@ -704,14 +704,18 @@ do_refresh_postgis() {
 from __future__ import print_function
 import re, sys
 data = '''${adockerfile//\\/\\\\}'''
-data = data.replace('./autogen.sh', ''': end
+data = data.replace('./autogen.sh', '''\
+usermod -s /bin/sh postgres \
+&& : end
 ADD patch-configure.sh /
 RUN set -ex && cd /usr/src/postgis && /patch-configure.sh configure* && ./autogen.sh \
 && export CFLAGS="\$CFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1" \
 && export CPPFLAGS="\$CFLAGS" && CPP_FLAGS="\$CFLAGS"''')
 data = data.replace('proj4', 'proj')
-data = data.replace('json-c-dev ', 'json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat pkgconfig')
-data = data.replace('json-c  ', 'json-c  sqlite-libs curl libcurl sqlite-libs expat pkgconfig')
+d = ' sqlite-libs pkgconfig shadow bash'
+data = data.replace('json-c-dev ', 'json-c-dev curl-dev expat-dev'+d)
+data = data.replace('json-c  ', 'json-c curl libcurl expat'+d)
+data = data.replace('su postgres -c ', 'su postgres -lc ')
 print(data)
 EOF
 )
@@ -735,8 +739,7 @@ EOF
     sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$cpostgis_alpine_version"'/g; s/%%POSTGIS_SHA256%%/'"$cpostgis_alpine_sha"'/g' "$imgalpine/Dockerfile"
     done
     rm -rf corpusops/postgis-bare/9.0-2.1-alpine
-    rm -rf corpusops/postgis-bare/9*-2.3-alpine
-    rm -rf corpusops/postgis-bare/9*-2.3-alpine
+    rm -rf corpusops/postgis-bare/9.{1,2,3,4,5}-*-alpine
     rm -rf corpusops/postgis-bare/9*-2.3-alpine
 }
 
