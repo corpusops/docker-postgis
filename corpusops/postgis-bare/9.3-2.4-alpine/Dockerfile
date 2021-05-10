@@ -37,7 +37,7 @@ RUN set -ex \
         gcc \
         gdal-dev \
         geos-dev \
-        llvm10-dev \
+        llvm9-dev \
         proj-dev \
         protobuf-c-dev \
     && cd /usr/src/postgis \

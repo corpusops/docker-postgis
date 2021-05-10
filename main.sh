@@ -720,7 +720,7 @@ EOF
                 -e '/MAINTAINER/ a ADD jsonb.patch.bz2 /usr/src' \
                 "$imgalpine/Dockerfile"
         fi
-        if ( echo $imgalpine | egrep -q "2\.3-alpine" );then
+        if ( echo $imgalpine | egrep -q "/(9\.[2,3,4,5]-2.[234]|10-2.4|2\.3)-alpine" );then
             sed -i -re 's/llvm10/llvm9/g' "$imgalpine/Dockerfile"
         fi
     cpostgis_alpine_version=${srcVersion}
