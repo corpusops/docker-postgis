@@ -220,31 +220,76 @@ DEBUG=${DEBUG-}
 FORCE_REBUILD=${FORCE_REBUILD-}
 DRYRUN=${DRYRUN-}
 NOREFRESH=${NOREFRESH-}
-NBPARALLEL=${NBPARALLEL-4}
+NBPARALLEL=${NBPARALLEL-2}
 SKIP_IMAGES_SCAN=${SKIP_IMAGES_SCAN-}
 SKIP_MINOR_ES="((elasticsearch):.*([0-5]\.?){3}(-32bit.*)?)"
+SKIP_MINOR_ES2="$SKIP_MINOR_ES|(elasticsearch:(5\.[0-4]\.)|(6\.8\.[0-8])|(6\.[0-7])|(7\.9\.[0-2])|(7\.[0-8]))"
 # SKIP_MINOR_NGINX="((nginx):.*[0-9]+\.[0-9]+\.[0-9]+(-32bit.*)?)"
-SKIP_MINOR="((wordpress|nginx|dejavu|redis|traefik|node|ruby|php|golang|python|mysql|postgres|solr|mongo|rabbitmq):.*[0-9]+\.([0-9]+\.)[0-9]+(-32bit.*)?)"
-  SKIP_PRE="((redis|traefik|node|ruby|php|golang|python|mysql|postgres|solr|elasticsearch|mongo|rabbitmq):.*(alpha|beta|rc)[0-9]*(-32bit.*)?)"
-SKIP_OS="(((suse|centos|fedora|redhat|alpine|debian|ubuntu|oldstable|oldoldstable):.*[0-9]{8}.*)"
+MINOR_IMAGES="(golang|mariadb|memcached|mongo|mysql|nginx|node|php|postgres|python|rabbitmq|redis|redmine|ruby|solr)"
+SKIP_MINOR_OS="$MINOR_IMAGES:.*alpine[0-9].*"
+SKIP_MINOR="$MINOR_IMAGES:.*[0-9]+\.([0-9]+\.)[0-9]+(-32bit.*)?"
+SKIP_PRE="((redis|node|ruby|php|golang|python|mariadb|mysql|postgres|solr|elasticsearch|mongo|rabbitmq):.*(alpha|beta|rc)[0-9]*(-32bit.*)?)"
+SKIP_OS="(((archlinux|suse|centos|fedora|redhat|alpine|debian|ubuntu|oldstable|oldoldstable):.*[0-9]{8}.*)"
+SKIP_OS="$SKIP_OS|((node):[0-9]+[0-9]+\.[0-9]+.*)"
+SKIP_OS="$SKIP_OS|((debian|redis):[0-9]+\.[0-9]+.*)"
+SKIP_OS="$SKIP_OS|(centos:.\..\.....|centos.\..\.....)"
+SKIP_OS="$SKIP_OS|(alpine:.\.[0-9]+\.[0-9]+)"
 SKIP_OS="$SKIP_OS|(debian:(6.*|squeeze))"
-SKIP_OS="$SKIP_OS|(ubuntu:(14.10|12|10|11|13|15))"
+SKIP_OS="$SKIP_OS|(ubuntu:(([0-9][0-9]\.[0-9][0-9]\..*)|(14.10|12|10|11|13|15)))"
 SKIP_OS="$SKIP_OS|(lucid|maverick|natty|precise|quantal|raring|saucy)"
 SKIP_OS="$SKIP_OS|(centos:(centos)?5)"
 SKIP_OS="$SKIP_OS|(fedora.*(modular|21))"
-SKIP_OS="$SKIP_OS|(traefik:(rc.*|(v?([0-9]+\.)*[0-9]+$)|((latest)$)))"
+SKIP_OS="$SKIP_OS|(traefik:((camembert|cancoillotte|cantal|chevrotin|faisselle|livarot|maroilles|montdor|morbier|picodon|raclette|reblochon|roquefort|tetedemoine)(-alpine)?|rc.*|(v?([0-9]+\.[0-9]+\.).*$)))"
 SKIP_OS="$SKIP_OS|(minio.*(armhf|aarch))"
 SKIP_OS="$SKIP_OS)"
 SKIP_PHP="(php:(.*(RC|-rc-).*))"
 SKIP_WINDOWS="(.*(nanoserver|windows))"
-SKIP_MISC="(-?(on.?build)|pgrouting.*old)"
-SKIP_MINIO="(minio:[0-9]{4}-.{7})"
+SKIP_MISC="(-?(on.?build)|pgrouting.*old)|seafile-mc:(7.0.1|7.0.2|7.0.3|7.0.4|7.0.5|7.1.3)|(dejavu:(v.*|1\..\.?.?|2\..\..)|3\.[1-3]\..|3.0.0|.*alpha.*$)"
+SKIP_NODE="((node):.*alpine3\..?.?)"
+SKIP_TF="(tensorflow.serving:[0-9].*)"
+SKIP_MINIO="(k8s-operator|((minio|mc):(RELEASE.)?[0-9]{4}-.{7}))"
 SKIP_MAILU="(mailu.*(feat|patch|merg|refactor|revert|upgrade|fix-|pr-template))"
-SKIPPED_TAGS="($SKIP_MINIO|$SKIP_MAILU|$SKIP_MINOR_ES|$SKIP_MINOR|$SKIP_PRE|$SKIP_OS|$SKIP_PHP|$SKIP_WINDOWS|$SKIP_MISC)"
+SKIP_DOCKER="docker(\/|:)([0-9]+\.[0-9]+\.|17|18.0[1-6]|1$|1(\.|-)).*"
+SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_MAILU|$SKIP_MINOR_ES2|$SKIP_MINOR|$SKIP_PRE|$SKIP_OS|$SKIP_PHP|$SKIP_WINDOWS|$SKIP_MISC"
 CURRENT_TS=$(date +%s)
-IMAGES_SKIP_NS="((mailhog|postgis|pgrouting|^library|dejavu|(minio/(minio|mc))))"
+IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
+
+
 default_images="
-corpusops/pgrouting
+appbaseio/dejavu
+minio/minio
+minio/mc
+minio/doctor
+library/memcached
+library/alpine
+library/centos
+library/debian
+library/fedora
+library/golang
+library/mysql
+library/mariadb
+library/nginx
+library/redis
+library/rabbitmq
+library/node
+library/php
+library/postgres
+library/python
+library/traefik
+library/ruby
+library/ubuntu
+library/opensuse
+library/solr
+library/mongo
+library/elasticsearch
+opensuse/tumbleweed
+opensuse/leap
+corpusops/pgrouting-bare
+corpusops/postgis-bare
+mailhog/mailhog
+mailu/postfix
+mailu/rspamd
+seafileltd/seafile-mc
 "
 
 find_top_node_() {
@@ -264,9 +309,14 @@ find_top_node_() {
 }
 find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
-MAILU_VERSiON=1.6
+MAILU_VERSiON=1.7
 BATCHED_IMAGES="\
-corpusops/postgis-bare/11-2.5\
+corpusops/postgis-bare/13-3\
+ corpusops/postgis-bare/13-2.5\
+ corpusops/postgis-bare/12-3\
+ corpusops/postgis-bare/12-2.5\
+ corpusops/postgis-bare/11-3\
+ corpusops/postgis-bare/11-2.5\
  corpusops/postgis-bare/10-2.4\
  corpusops/postgis-bare/10-2.5\
  corpusops/postgis-bare/9.0-2.1\
@@ -283,7 +333,12 @@ corpusops/postgis-bare/11-2.5\
  corpusops/postgis-bare/9.6-2.4\
  corpusops/postgis-bare/9.6-2.5\
  corpusops/postgis-bare/9.4-2.4::30
-corpusops/postgis-bare/11-2.5-alpine\
+corpusops/postgis-bare/13-3-alpine\
+ corpusops/postgis-bare/13-2.5-alpine\
+ corpusops/postgis-bare/12-3-alpine\
+ corpusops/postgis-bare/12-2.5-alpine\
+ corpusops/postgis-bare/11-3-alpine\
+ corpusops/postgis-bare/11-2.5-alpine\
  corpusops/postgis-bare/10-2.4-alpine\
  corpusops/postgis-bare/10-2.5-alpine\
  corpusops/postgis-bare/9.2-2.3-alpine\
@@ -296,7 +351,7 @@ corpusops/postgis-bare/11-2.5-alpine\
  corpusops/postgis-bare/9.6-2.4-alpine\
  corpusops/postgis-bare/9.6-2.5-alpine::30
 "
-SKIP_REFRESH_ANCETORS=${SKIP_REFRESH_ANCETORS-}
+SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
 POSTGIS_MINOR_TAGS="
 9.0-2.1
 9.1-2.2
@@ -306,7 +361,9 @@ POSTGIS_MINOR_TAGS="
 9.4-2.3 9.4-2.4 9.5-2.4 9.6-2.4
 9.4-2.5 9.5-2.5 9.6-2.5
 10-2.4 10-2.5
-11-2.5
+11-2.5 11-3
+12-2.5 12-3
+13-2.5 13-3
 "
 PGROUTING_MINOR_TAGS="
 9.4-2.4-2.4
@@ -526,11 +583,13 @@ is_skipped() {
     if ( echo "$t" | egrep -q "$SKIPPED_TAGS" );then
         ret=0
     fi
-    if ( echo "$t" | egrep -q "/traefik" ) && ( echo "$t" | egrep -vq "alpine" );then
-        ret=0
-    fi
+    # if ( echo "$t" | egrep -q "/traefik" ) && ( echo "$t" | egrep -vq "alpine" );then
+    #     ret=0
+    # fi
     return $ret
 }
+# echo $(set -x && is_skipped library/redis/3.0.4-32bit;echo $?)
+# exit 1
 
 skip_local() {
     egrep -v "(.\/)?local"
@@ -568,6 +627,8 @@ get_image_tags() {
     local last_modified=$(stat -c "%Y" "$t.raw" 2>/dev/null )
     if [ -e "$t.raw" ] && [ $(($CURRENT_TS-$last_modified)) -lt $((24*60*60)) ];then
         has_more=1
+    else
+        has_more=0
     fi
     if [ $has_more -eq 0 ];then
         while [ $has_more -eq 0 ];do
@@ -575,7 +636,7 @@ get_image_tags() {
             result=$( curl "${u}?page=${i}" 2>/dev/null \
                 | jq -r '."results"[]["name"]' 2>/dev/null )
             has_more=$?
-            if [[ -n "${result}}" ]];then results="${results} ${result}";fi
+            if [[ -n "${result}" ]];then results="${results} ${result}";else has_more=256;fi
         done
         if [ ! -e "$TOPDIR/$n" ];then mkdir -p "$TOPDIR/$n";fi
         printf "$results\n" | sort -V > "$t.raw"
@@ -603,6 +664,7 @@ do_clean_tags() {
     log "Cleaning on $image"
     local tags=$(get_image_tags $image )
     debug "image: $image tags: $( echo $tags )"
+    if [[ -z "$1" ]];then echo "no image";exit 1;fi
     while read image;do
         local tag=$(basename $image)
         if ! ( echo "$tags" | egrep -q "^$tag$" );then
@@ -612,7 +674,7 @@ do_clean_tags() {
 }
 
 do_refresh_ancestors() {
-    if [[ -n $SKIP_REFRESH_ANCETORS ]];then return;fi
+    if [[ -n $SKIP_REFRESH_ANCESTORS ]];then return;fi
     IMAGES_URL="https://github.com/corpusops/docker-images"
     if [ ! -e docker-images ];then git clone $IMAGES_URL docker-images;fi
     POSTGIS_URL="https://github.com/appropriate/docker-postgis.git"
@@ -727,7 +789,10 @@ is_same_commit_label() {
 
 get_docker_squash_args() {
     DOCKER_DO_SQUASH=${DOCKER_DO_SQUASH-init}
-    if [[ "$DOCKER_DO_SQUASH" = init ]];then
+    if ! ( echo "${NO_SQUASH-}"|egrep -q "^(no)?$" );then
+        DOCKER_DO_SQUASH=""
+        log "no squash"
+    elif [[ "$DOCKER_DO_SQUASH" = init ]];then
         DOCKER_DO_SQUASH="--squash"
         if ! (printf "FROM alpine\nRUN touch foo\n" | docker build --squash - >/dev/null 2>&1 );then
             DOCKER_DO_SQUASH=
@@ -766,8 +831,12 @@ set_global_tags() {
     set_global_tag corpusops/postgis-bare:10-2.5-alpine  corpusops/postgis-bare:10-alpine
     set_global_tag corpusops/postgis-bare:11-2.5         corpusops/postgis-bare:11
     set_global_tag corpusops/postgis-bare:11-2.5-alpine  corpusops/postgis-bare:11-alpine
-    set_global_tag corpusops/postgis-bare:11             corpusops/postgis-bare:latest
-    set_global_tag corpusops/postgis-bare:11-alpine      corpusops/postgis-bare:alpine
+    set_global_tag corpusops/postgis-bare:12-2.5         corpusops/postgis-bare:12
+    set_global_tag corpusops/postgis-bare:12-2.5-alpine  corpusops/postgis-bare:12-alpine
+    set_global_tag corpusops/postgis-bare:13-3-alpine    corpusops/postgis-bare:13-alpine
+    set_global_tag corpusops/postgis-bare:13-3           corpusops/postgis-bare:13
+    set_global_tag corpusops/postgis-bare:13             corpusops/postgis-bare:latest
+    set_global_tag corpusops/postgis-bare:13-alpine      corpusops/postgis-bare:alpine
 }
 
 record_build_image() {
@@ -785,21 +854,28 @@ record_build_image() {
         return
     fi
     dargs="${DOCKER_BUILD_ARGS-} $(get_docker_squash_args)"
-    local dbuild="docker build ${dargs-}  -t $itag . -f $image/$df --build-arg=DOCKER_IMAGES_COMMIT=$git_commit"
-    local retries=${DOCKER_BUILD_RETRIES:-4}
+    local dbuild="cat $image/$df|docker build ${dargs-}  -t $itag . -f - --build-arg=DOCKER_IMAGES_COMMIT=$git_commit"
+    local retries=${DOCKER_BUILD_RETRIES:-2}
     local cmd="dret=8 && for i in \$(seq $retries);do if ($dbuild);then dret=0;break;else dret=6;fi;done"
     local cmd="$cmd && if [ \"x\$dret\" != \"x0\" ];then"
     local cmd="$cmd      echo \"${RED}$image/$df build: Failing after $retries retries${NORMAL}\" >&2"
     local cmd="$cmd      && false;fi"
     local run="echo -e \"${RED}$dbuild${NORMAL}\" && $cmd"
-
     local release_tags="$itag"
     for alt_tag in ${duplicated_tags[$itag]};do
         release_tags="$release_tags $alt_tag"
         run="$run && docker tag $itag $alt_tag"
     done
     if [[ -n "$DO_RELEASE" ]];then
-        run="$run && ./local/corpusops.bootstrap/hacking/docker_release $release_tags"
+        for itag in $release_tags;do
+        run="$run && ./local/corpusops.bootstrap/hacking/docker_release $itag"
+        done
+        if [[ -n "${GITHUB_REF-}" ]];then
+            for itag in $release_tags;do
+            run="$run && ( docker rmi $itag || /bin/true )"
+            done
+            run="$run && (./local/corpusops.bootstrap/bin/cops_docker_cleanup.sh || /bin/true)"
+        fi
     fi
     book="$(printf "$run\n${book}" )"
 }
@@ -817,14 +893,16 @@ load_all_batched_images() {
 #     build:  (no arg) refresh all images
 #     build library/ubuntu: only refresh ubuntu images
 #     build library/ubuntu/latest: only refresh ubuntu:latest image
-#     build leftover:BATCH_QUARTED/BATCH_SIZE find images that wont be explictly built and build them per batch
+#     build zleftover:BATCH_QUARTED/BATCH_SIZE find images that wont be explictly built and build them per batch
 #     If DO_RELEASE is set, image will be pushed using corpusops.bootstrap/hacking/docker_release
 #     If FORCE_REBUILD is set, image will be rebuilt even if commit label of any existing remote image matches
+# zleftover because of https://github.com/actions/runner/issues/483 , we want
+# first jobs that produces specific images to run
 do_build() {
     local images_args="${@:-$default_images}" images="" allcandidates=""
-    # batch then all leftover images that werent batched at first
+    # batch then all zleftover images that werent batched at first
     local i=
-    if ( echo "$@" |egrep -q leftover: ) && [[ -z "${SKIP_IMAGES_SCAN}" ]];then
+    if ( echo "$@" |egrep -q zleftover: ) && [[ -z "${SKIP_IMAGES_SCAN}" ]];then
         load_all_batched_images
         for k in $(do_list_images);do
             for l in $(do_list_image $k);do
@@ -836,11 +914,11 @@ do_build() {
         done
     fi
     for imagepart in $images_args;do
-        if ( echo $imagepart|grep -q leftover);then
+        if ( echo $imagepart|grep -q zleftover);then
             local candidates=""
-            local leftover_re="leftover:\([0-9]\+\)[/]\([0-9]\+\)"
-            local part=$(  echo $imagepart|sed -e "s/$leftover_re/\1/g" )
-            local chunks=$(echo $imagepart|sed -e "s/$leftover_re/\2/g" )
+            local zleftover_re="zleftover:\([0-9]\+\)[/]\([0-9]\+\)"
+            local part=$(  echo $imagepart|sed -e "s/$zleftover_re/\1/g" )
+            local chunks=$(echo $imagepart|sed -e "s/$zleftover_re/\2/g" )
             local size=$(echo "$allcandidates"|wc -w)
             local chunksize="$(($size/$chunks))"
             local c=0 inf=$(($part-1)) sup=$part
@@ -918,6 +996,7 @@ is_image() {
 #  [SKIP_CORPUSOPS=] refresh_corpusops: install & upgrade corpusops
 do_refresh_corpusops() {
     if [[ -z ${SKIP_CORPUSOPS-} ]];then
+        if [[ -n $COPS_ROOT ]] && [ ! -e "$COPS_ROOT" ];then mkdir -p "$COPS_ROOT";fi
         vv .ansible/scripts/download_corpusops.sh
         vv .ansible/scripts/setup_corpusops.sh
     fi
@@ -962,6 +1041,7 @@ is_in_images() {
 
 reset_images() {
     _images_=""
+    _ghimages_=""
     _images_list_=""
 }
 
@@ -969,6 +1049,7 @@ reset_images() {
 load_batched_images() {
     local i=
     local batch="  - IMAGES=\""
+    local ghbatch="        - \""
     local counter=0
     local default_batchsize=$1
     shift
@@ -977,8 +1058,10 @@ load_batched_images() {
         local batchsize=$default_batchsize
         if $(echo $i|grep -q ::);then batchsize=${i//*::};fi
         debug "_batch_images_($imgs :: $batchsize): $batch"
+        debug "_ghbatch_images_($imgs :: $batchsize): $ghbatch"
         for img in $imgs;do
             debug "_batch_image_($img :: $batchsize): $batch"
+            debug "_ghbatch_image_($img :: $batchsize): $ghbatch"
             local subimages=$(do_list_image $img)
             if [[ -z $subimages ]];then break;fi
             for j in $subimages;do
@@ -988,6 +1071,7 @@ load_batched_images() {
                         space=""
                         if [ $counter -gt 0 ];then
                             batch="$(printf -- "${batch}\"\n  - IMAGES=\""; )"
+                            ghbatch="$(printf -- "${ghbatch}\"\n        - \""; )"
                         fi
                     fi
                     counter=$(( $counter+1 ))
@@ -995,14 +1079,28 @@ load_batched_images() {
 $j
                     "
                     batch="${batch}${space}${j}"
+                    ghbatch="${ghbatch}${space}${j}"
                 fi
             done
         done
     done
     if [ $counter -gt 0 ];then
         _images_="$(printf "${_images_}\n${batch}\"" )"
+        _ghimages_="$(printf "${_ghimages_}\n${ghbatch}\"" )"
     fi
 }
+
+#  gen_gh; regenerate .github/workflows/cicd.yml file
+do_gen_gh() {
+    reset_images
+    debug "_images_(pre): $_ghimages_"
+    # batch first each explicily built images
+    load_all_batched_images
+    __IMAGES="$_ghimages_" \
+        envsubst '$__IMAGES;' > "$W/.github/workflows/cicd.yml" \
+        < "$W/.github/workflows/cicd.yml.in"
+}
+
 
 #  gen_travis; regenerate .travis.yml file
 do_gen_travis() {
@@ -1018,7 +1116,11 @@ do_gen_travis() {
 #  gen: regenerate both images and travis.yml
 do_gen() {
     if [[ -z "$NOREFRESH" ]];then do_refresh_images $@;fi
-    do_gen_travis
+    do_gen_gh
+}
+
+do_make_tags() {
+    make_tags $@
 }
 
 #  usage: show this help
@@ -1031,10 +1133,11 @@ do_usage() {
     echo ""
 }
 
+
 do_main() {
     set_global_tags
     local args=${@:-usage}
-    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_postgis"
+    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_postgis|make_tags|gen_gh"
     actions="@($actions)"
     action=${1-};
     if [[ -n "$@" ]];then shift;fi
