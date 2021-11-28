@@ -1,9 +1,10 @@
 FROM postgres:10-alpine
 
-MAINTAINER Régis Belson <me@regisbelson.fr>
 
-ENV POSTGIS_VERSION 2.5.2
-ENV POSTGIS_SHA256 225aeaece00a1a6a9af15526af81bef2af27f4c198de820af1367a792ee1d1a9
+LABEL maintainer="PostGIS Project - https://postgis.net"
+
+ENV POSTGIS_VERSION 2.5.5
+ENV POSTGIS_SHA256 24b15ee36f3af02015da0e92a18f9046ea0b4fd24896196c8e6c2aa8e4b56baa
 
 RUN set -ex \
     \
@@ -25,18 +26,18 @@ RUN set -ex \
     && apk add --no-cache --virtual .build-deps \
         autoconf \
         automake \
-        g++ \
+        file \
         json-c-dev sqlite-libs curl libcurl curl-dev expat-dev expat\
         libtool \
         libxml2-dev \
         make \
         perl \
-    \
-    && apk add --no-cache --virtual .build-deps-edge \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \    
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
+        clang-dev \
+        g++ \
+        gcc \
         gdal-dev \
         geos-dev \
+        llvm10-dev \
         proj-dev \
         protobuf-c-dev \
     && cd /usr/src/postgis \
@@ -47,22 +48,32 @@ RUN set -ex && cd /usr/src/postgis && /patch-configure.sh configure* && ./autoge
 # https://anonscm.debian.org/cgit/pkg-grass/postgis.git/tree/debian/rules?h=jessie
     && ./configure \
 #       --with-gui \
-    && make \
+    && make -j$(nproc) \
     && make install \
+# regress check
+    && mkdir /tempdb \
+    && chown -R postgres:postgres /tempdb \
+    && su postgres -c 'pg_ctl -D /tempdb init' \
+    && su postgres -c 'pg_ctl -D /tempdb start' \
+    && cd regress \
+    && make -j$(nproc) check RUNTESTFLAGS=--extension PGUSER=postgres \
+    && su postgres -c 'pg_ctl -D /tempdb --mode=immediate stop' \
+    && rm -rf /tempdb \
+    && rm -rf /tmp/pgis_reg \
+# add .postgis-rundeps
     && apk add --no-cache --virtual .postgis-rundeps \
         json-c \
-    && apk add --no-cache --virtual .postgis-rundeps-edge \
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing \    
-        --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \        
         geos \
         gdal \
         proj \
+        libstdc++ \
         protobuf-c \
+# clean
     && cd / \
     && rm -rf /usr/src/postgis \
-    && apk del .fetch-deps .build-deps .build-deps-edge
+    && apk del .fetch-deps .build-deps
 
-COPY ./initdb-postgis.sh /docker-entrypoint-initdb.d/postgis.sh
+COPY ./initdb-postgis.sh /docker-entrypoint-initdb.d/10_postgis.sh
 COPY ./update-postgis.sh /usr/local/bin
 LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
 ARG DOCKER_IMAGES_COMMIT=master

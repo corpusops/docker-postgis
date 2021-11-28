@@ -1,0 +1,71 @@
+env:
+  DOCKER_BUILDKIT: "1"
+  COMPOSE_DOCKER_CLI_BUILD: "1"
+  BUILDKIT_PROGRESS: "plain"
+  NO_SQUASH: ""
+  NO_SILENT: "1"
+  NONINTERACTIVE: "1"
+  FORCE_ONLINE: "1"
+  NBPARALLEL: "2"
+  RELEASABLE_REPOS: "^corpusops/"
+  RELEASABLE_BRANCHES: "^(refs/heads/)?(master|2.0|workflows)$"
+  COPS_URL: "https://github.com/corpusops/corpusops.bootstrap"
+  COPS_ROOT: "${{github.workspace}}/local/corpusops.bootstrap"
+  silent: "$COPS_ROOT/bin/cops_shell_common output_in_error silent_vv"
+  DOCKER_RELEASER: "${{ secrets.DOCKER_HUB_USERNAME }}"
+  DOCKER_PASSWORD: "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}"
+jobs:
+  r:
+    runs-on: ubuntu-20.04
+    env: {IMAGES: "${{matrix.IMAGES}}"}
+    steps:
+      - name: Set vars
+        run: |-
+            if ( echo "$GITHUB_REF" | egrep -q "${RELEASABLE_BRANCHES}" ) \
+            && ( echo "$GITHUB_REPOSITORY" | egrep -q "${RELEASABLE_REPOS}" )
+            then releasable=true;else releasable=false;fi
+            echo "::set-output name=releasable::$releasable"
+            echo "::set-output name=silent::$(echo $silent)"
+        id: v
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Activate docker experimental
+        run: |-
+          sudo bash -exc "service docker stop;python -c \
+          \"d='/etc/docker/daemon.json';\
+          import json;c=json.load(open(d));c['experimental']=True;\
+          open(d, 'w').write(json.dumps(c))\"
+          systemctl restart docker"
+      - uses: actions/checkout@v2
+      - name: Cache multiple paths
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache
+            local
+          key: 6-${{ runner.os }}-${{ github.ref }}-${{ github.repository }}-venvstatics
+      - name: setup
+        run: set -e;i=$(whoami);sudo sh -c "chown -Rf $i .";
+             ./main.sh refresh_corpusops;
+             sudo sh -c 'apt-get update -qq && apt-get install -qqy --force-yes parallel'
+      - name: refresh images
+        run: set -e;if (echo $IMAGES|grep -q zleftover);then
+             rm -f */*/*/Dockerfile&&${{steps.v.outputs.silent}} ./refresh_images.sh;
+             fi
+      - name: build & release
+        run: set -e;
+             if [ "x${{steps.v.outputs.releasable}}" = "xtrue" ];then export DO_RELEASE=1;fi;
+             ./build.sh $IMAGES
+# ${{steps.v.outputs.silent}} ./build.sh $IMAGES
+    strategy:
+      max-parallel: 5
+      fail-fast: false
+      matrix:
+        IMAGES:$__IMAGES
+on:
+  push:
+  workflow_dispatch:
+  schedule: [{cron: '1 0 1,3,5,15,17,19 * *'}]
