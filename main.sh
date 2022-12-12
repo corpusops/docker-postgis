@@ -836,7 +836,7 @@ set_global_tags() {
 }
 
 record_build_image() {
-    # library/ubuntu/latest / mdillon/postgis/latest
+    # library/ubuntu/latest / corpusops/postgis/latest
     local image=$1
     # latest / latest
     local git_commit="${git_commit:-$(get_git_changeset "$W")}"
@@ -1061,7 +1061,7 @@ load_batched_images() {
             local subimages=$(do_list_image $img)
             if [[ -z $subimages ]];then break;fi
             for j in $subimages;do
-                if ! ( is_in_images $j );then
+                if ! ( is_in_images $j ) && ( echo "$batched_images" | egrep -q "^$j$");then
                     local space=" "
                     if [ `expr $counter % $batchsize` = 0 ];then
                         space=""
@@ -1133,7 +1133,7 @@ do_usage() {
 do_main() {
     set_global_tags
     local args=${@:-usage}
-    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_postgis|make_tags|gen_gh"
+    local actions="refresh_corpusops|refresh_images|build|gen_travis|gen|list_images|clean_tags|get_namespace_tag|refresh_ancestors|refresh_postgis|make_tags|gen_gh|gen_image|get_image_tags"
     actions="@($actions)"
     action=${1-};
     if [[ -n "$@" ]];then shift;fi
