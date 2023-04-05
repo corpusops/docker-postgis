@@ -48,6 +48,15 @@ elif [ -e /etc/redhat-release ];then
     DISTRIB_RELEASE=$(echo $(head  /etc/issue)|awk '{print tolower($3)}')
 fi
 DISTRIB_MAJOR="$(echo ${DISTRIB_RELEASE}|sed -re "s/\..*//g")"
+if ( grep -q amzn /etc/os-release );then
+    yuminstall findutils
+    if ( amazon-linux-extras help >/dev/null 2>&1 );then
+        amazon-linux-extras install -y epel
+    else
+        yum install -y epel-release
+        yum-config-manager --enable epel
+    fi
+fi
 if [ -e /etc/redhat-release ];then
     if [ -e /etc/fedora-release ];then
         vv yum upgrade -y --nogpg fedora-gpg-keys fedora-repos
@@ -194,6 +203,7 @@ if ( echo "$DISTRIB_ID $DISTRIB_RELEASE $DISTRIB_CODENAME" | egrep -iq alpine );
     log "Upgrading alpine"
     apk upgrade --update-cache --available
 fi
+./bin/fix_letsencrypt.sh
 export FORCE_INSTALL=y
 DO_UPDATE="$DO_UPDATE" WANTED_PACKAGES="$pkgs" ./cops_pkgmgr_install.sh
 install_gpg

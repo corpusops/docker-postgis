@@ -1,10 +1,10 @@
-FROM postgres:10-alpine3.14
+FROM postgres:14-alpine3.14
 
 
 LABEL maintainer="PostGIS Project - https://postgis.net"
 
-ENV POSTGIS_VERSION 2.5.5
-ENV POSTGIS_SHA256 24b15ee36f3af02015da0e92a18f9046ea0b4fd24896196c8e6c2aa8e4b56baa
+ENV POSTGIS_VERSION 3.1.4
+ENV POSTGIS_SHA256 dfcbad0c6090c80bc59d3ea77d1adc4b3ade533a403761b4af6d9a44be1a6e48
 
 #Temporary fix:
 #   for PostGIS 2.* - building a special geos

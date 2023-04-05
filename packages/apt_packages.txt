@@ -1,0 +1,15 @@
+cron
+curl
+locales
+logrotate
+socat
+tzdata
+wget
+# not default on debian
+ca-certificates
+dirmngr
+# envsubst
+gettext-base
+p7zip-full
+rsyslog
+openssl

@@ -1,0 +1,20 @@
+$RepeatedMsgReduction on
+# The default value is 8k. When the size of one log line > 8k, the line
+# is truncated and causes mess in log file directory
+$MaxMessageSize 32k
+# provides support for local system logging
+$ModLoad imuxsock
+$outchannel rsyslog_outfile,{{ .Env.RSYSLOG_OUTFILE|default "/var/log/messages" }}, {{ .Env.RSYSLOG_OUTFILE_SIZE|default "500000000" }},/etc/periodic/daily/logrotate
+$template dockerFormat,"{{ .Env.RSYSLOG_LOGFORMAT|default "<%PRI%> %timegenerated% %HOSTNAME% %syslogtag% %msg%\\n" }}"
+$ActionFileDefaultTemplate dockerFormat
+{{ $outstdout  := .Env.RSYSLOG_OUT_SDTOUT |default "notset" }}
+{{ $outlogfile := .Env.RSYSLOG_OUT_LOGFILE|default "notset" }}
+{{ $confdir := .Env.RSYSLOG_CONF_DIR|default "/etc/rsyslog.d" }}
+{{ $splitconf := .Env.RSYSLOG_SPLITTED_CONFIGS|default "0" }}
+{{ if ne $outstdout "n" }}
+*.*;auth,authpriv.none /dev/stdout
+{{ end }}
+{{ if and (ne $outlogfile "n") (ne $splitconf "1") }}
+*.*;auth,authpriv.none :omfile:$rsyslog_outfile
+{{ end }}
+$IncludeConfig {{$confdir}}/*.conf
