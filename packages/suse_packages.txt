@@ -1,0 +1,14 @@
+bash
+ca-certificates
+cronie
+curl
+logrotate
+socat
+timezone
+wget
+tar
+glibc-locale
+glibc-i18ndata
+p7zip
+rsyslog
+openssl

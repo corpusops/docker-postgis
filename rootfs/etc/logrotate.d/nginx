@@ -1,0 +1,27 @@
+# to be processed by frep
+
+/log/nginx/*-error.log
+/log/nginx/*-access.log
+/logs/nginx/*-error.log
+/logs/nginx/*-access.log
+/log/*-error.log
+/log/*-access.log
+/logs/*-error.log
+/logs/*-access.log
+/var/log/nginx/*.log
+{
+  daily
+  nodateext
+  missingok
+  rotate {{.Env.NGINX_ROTATE}}
+  compress
+  delaycompress
+  notifempty
+  create 0640 {{.Env.NGINX_USER}} {{.Env.NGINX_GROUP}}
+  sharedscripts
+      postrotate
+       if [ -f {{.Env.NGINX_PIDFILE}} ];then
+        kill -USR1 `cat {{.Env.NGINX_PIDFILE}}` || /bin/true
+       fi
+      endscript
+}

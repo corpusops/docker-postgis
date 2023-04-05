@@ -1,4 +1,4 @@
-FROM postgres:11
+FROM postgres:14
 ARG NONINTERACTIVE=y
 ADD helpers/ /tmp/copshelpers/
 RUN cd /tmp/copshelpers && ./up.sh \

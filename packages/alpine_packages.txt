@@ -1,0 +1,14 @@
+bash
+ca-certificates
+# force libcurl upgrade !
+curl
+gnupg
+logrotate
+socat
+tzdata
+wget
+# for envsubst
+gettext
+p7zip
+rsyslog
+openssl
