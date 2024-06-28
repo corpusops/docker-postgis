@@ -257,7 +257,7 @@ SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_
 CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
-SKIP_POSTGRES="postgres:(.*beta.*|.*alpine3.*|.*alpine.*|9\.[0-9]+\.[0-9]+.*|9\.0|8.*|1[09]\.[0-9].*)$"
+SKIP_POSTGRES="post.*:.*1[3-9].-[0-3]|postgres:(.*beta.*|.*alpine3.*|.*alpine.*|9\.[0-9]+\.[0-9]+.*|9\.0|8.*|1[09]\.[0-9].*)$"
 SKIPPED_TAGS="$SKIP_MISC|$SKIP_PRE|$SKIP_POSTGRES|:(9|10|11)\.|:.*alpine.*"
 default_images="
 corpusops/postgis-bare
@@ -328,6 +328,7 @@ PGROUTING_MINOR_TAGS="
 15-3-3.4
 14-3-3.4
 13-3-3.4
+13-3-3.1
 12-3-3.1
 12-3-3.0
 11-3-3.1
@@ -353,7 +354,6 @@ PGROUTING_MINOR_TAGS="
 10-2.4-2.6
 10-2.5-2.4
 10-2.5-2.5
-11-2.5-2.5
 12-2.5-2.6
 12-2.5-2.6
 12-2.5-2.6
