@@ -257,7 +257,8 @@ SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_
 CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
-
+SKIP_POSTGRES="postgres:(.*beta.*|.*alpine3.*|9.*alpine.*|9\.[0-9]+\.[0-9]+.*|9\.0|8.*|1[09]\.[0-9].*)$"
+SKIPPED_TAGS="$SKIP_MISC|$SKIP_PRE|$SKIP_POSTGRES|:(9|10|11)\."
 default_images="
 corpusops/postgis-bare
 "
@@ -370,8 +371,11 @@ PGROUTING_MINOR_TAGS="
 POSTGRES_MAJOR="9 10 11 12 13 14"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-packagesUrlStretch='http://apt.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
+packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesUrlBuster='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
+packagesBuster="local/$(echo "$packagesUrlBuster" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+
 
 declare -A duplicated_tags
 declare -A registry_tokens
@@ -713,13 +717,14 @@ do_clean_tags() {
 do_refresh_postgis() {
     curl -sSL "${packagesUrlJessie}.bz2"  | bunzip2 > "$packagesJessie"
     curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
+    curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesBuster"
     for version in $POSTGIS_MINOR_TAGS;do
         if (echo $version|grep -E -q "(9.0|9.1|9.2)-(2.0|2.1|2.2)");then
             packages="$packagesJessie"
             debian_release=jessie
         else
-            packages="$packagesStretch"
-            debian_release=stretch
+            packages="$packagesBuster"
+            debian_release=buster
         fi
         IFS=- read pg_major postgis_major <<< "$version"
         img="corpusops/postgis-bare/$version"
