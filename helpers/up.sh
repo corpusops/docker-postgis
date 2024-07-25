@@ -18,7 +18,7 @@ _cops_SYSTEM=$(system_detect.sh||./system_detect.sh||"$W/system_detect.sh")
 DISTRIB_ID=
 DISTRIB_CODENAME=
 DISTRIB_RELEASE=
-oldubuntu="^(10\.|12\.|13\.|14.10|15\.|16.10|17\.04|17\.10|18\.10|19\.04|19\.10)"
+oldubuntu="^(10\.|12\.|13\.|14\.|15\.|16\.|17\.|18\.10|19\.|20\.10|21\.)"
 # oldubuntu="^(10\.|12\.|13\.|14.10|15\.|16.10|17\.04)"
 NOSOCAT=""
 OAPTMIRROR="${OAPTMIRROR:-}"
@@ -48,6 +48,9 @@ elif [ -e /etc/redhat-release ];then
     DISTRIB_RELEASE=$(echo $(head  /etc/issue)|awk '{print tolower($3)}')
 fi
 DISTRIB_MAJOR="$(echo ${DISTRIB_RELEASE}|sed -re "s/\..*//g")"
+if [ "x${DISTRIB_ID}" = "xcentos" ] && ( echo  "${DISTRIB_MAJOR}" | grep -Eq "^(6|7|8)");then
+    sed -i 's/mirrorlist/#mirrorlist/g;s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+fi
 if ( grep -q amzn /etc/os-release );then
     yuminstall findutils
     if ( amazon-linux-extras help >/dev/null 2>&1 );then
@@ -201,6 +204,7 @@ if [ -e /etc/fedora-release ];then
 fi
 if ( echo "$DISTRIB_ID $DISTRIB_RELEASE $DISTRIB_CODENAME" | grep -E -iq alpine );then
     log "Upgrading alpine"
+    apk update && apk add bash
     apk upgrade --update-cache --available
 fi
 ./bin/fix_letsencrypt.sh
@@ -214,6 +218,5 @@ if ! ( echo foo|envsubst >/dev/null 2>&1);then
         echo "envsubst is missing"
     fi
 fi
-find /etc/rsyslog.d -name "*.conf" -not -type d \
-    | while read f;do mv -vf "$f" "$f.sample";done
+find /etc/rsyslog.d -name "*.conf" -not -type d |while read f;do mv -vf "$f" "$f.sample";done
 # vim:set et sts=4 ts=4 tw=0:
