@@ -1,7 +1,29 @@
 FROM postgres:12
 ARG NONINTERACTIVE=y
-ADD helpers/ /tmp/copshelpers/
-RUN cd /tmp/copshelpers && ./up.sh \
+ADD \
+    helpers/up.sh \
+    helpers/add_gosu.sh \
+    helpers/system_detect.sh \
+    helpers/add_frep.sh \
+    helpers/add_confd.sh \
+    helpers/add_dockerize.sh \
+    helpers/add_forego.sh \
+    helpers/add_opt_pkgs.sh \
+    helpers/add_remco.sh \
+    helpers/setup_locales.sh \
+    helpers/cops_pkgmgr_install.sh \
+    helpers/*_up.sh \
+    helpers/*_clean.sh \
+    rootfs/ \
+    packages/*packages*.txt \
+    ${EXTRA_FILES_LIST} \
+    /tmp/corpusopssteroids/
+RUN cd /tmp/corpusopssteroids \
+    && export PATH=$(pwd):$PATH \
+    && _cops_SYSTEM=$(./system_detect.sh) \
+    && cat ${_cops_SYSTEM}_packages*.txt > packages.txt \
+    && cat ${_cops_SYSTEM}_optional_packages*.txt optional_packages*.txt > optional_packages.txt \
+    && ./up.sh \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 MAINTAINER Mike Dillon <mike@appropriate.io>

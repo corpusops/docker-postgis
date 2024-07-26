@@ -375,6 +375,8 @@ packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretc
 packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlBuster='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
 packagesBuster="local/$(echo "$packagesUrlBuster" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesUrlBullseye='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
+packagesBullseye="local/$(echo "$packagesUrlBullseye" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 
 
 declare -A duplicated_tags
@@ -574,8 +576,6 @@ is_skipped() {
     # fi
     return $ret
 }
-# echo $(set -x && is_skipped library/redis/3.0.4-32bit;echo $?)
-# exit 1
 
 skip_local() {
     grep -E -v "(.\/)?local"
@@ -722,9 +722,12 @@ do_refresh_postgis() {
         if (echo $version|grep -E -q "(9.0|9.1|9.2)-(2.0|2.1|2.2)");then
             packages="$packagesJessie"
             debian_release=jessie
-        else
+        elif (echo $version|grep -E -q "^(11|12|13|14)");then
             packages="$packagesBuster"
             debian_release=buster
+        else
+            packages="$packagesBullseye"
+            debian_release=bullseye
         fi
         IFS=- read pg_major postgis_major <<< "$version"
         img="corpusops/postgis-bare/$version"
@@ -820,7 +823,7 @@ do_refresh_images() {
     cp -vf docker-postgis/*postgis*.sh .
     chmod +x *sh
     chmod -x initdb-*.sh
-    rsync -azv --delete docker-images/helpers/ helpers/
+    rsync -azv --delete local/docker-images/helpers/ helpers/
     # code adapted from: docker-postgis/update.sh
     do_refresh_postgis
 }
