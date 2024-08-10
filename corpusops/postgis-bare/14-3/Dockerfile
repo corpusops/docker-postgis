@@ -29,7 +29,7 @@ RUN cd /tmp/corpusopssteroids \
 MAINTAINER Mike Dillon <mike@appropriate.io>
 
 ENV POSTGIS_MAJOR 3
-ENV POSTGIS_VERSION 3.2.1+dfsg-1.pgdg90+1
+ENV POSTGIS_VERSION 3.3.2+dfsg-1.pgdg110+1
 
 RUN apt-get update \
       && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
