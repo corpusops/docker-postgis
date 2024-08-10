@@ -284,7 +284,9 @@ NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
 
 BATCHED_IMAGES="\
-corpusops/postgis-bare/13-3\
+corpusops/postgis-bare/15-3\
+ corpusops/postgis-bare/14-3\
+ corpusops/postgis-bare/13-3\
  corpusops/postgis-bare/12-3\
  corpusops/postgis-bare/12-2.5\
  corpusops/postgis-bare/11-3\
@@ -305,7 +307,7 @@ corpusops/postgis-bare/13-3\
  corpusops/postgis-bare/9.5-2.5\
  corpusops/postgis-bare/9.6-2.4\
  corpusops/postgis-bare/9.6-2.5\
- corpusops/postgis-bare/9.4-2.4::30
+ corpusops/postgis-bare/9.4-2.4::32
 corpusops/postgis-bare/13-3-alpine\
  corpusops/postgis-bare/12-3-alpine\
  corpusops/postgis-bare/12-2.5-alpine\
@@ -338,6 +340,7 @@ POSTGIS_MINOR_TAGS="
 12-2.5 12-3
 13-3
 14-3
+15-3
 "
 PGROUTING_MINOR_TAGS="
 9.4-2.4-2.4
@@ -368,14 +371,14 @@ PGROUTING_MINOR_TAGS="
 11-2.5-2.5
 11-2.5-2.6
 "
-POSTGRES_MAJOR="9 10 11 12 13 14"
+POSTGRES_MAJOR="9 10 11 12 13 14 15"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlBuster='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
 packagesBuster="local/$(echo "$packagesUrlBuster" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-packagesUrlBullseye='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
+packagesUrlBullseye='http://apt.postgresql.org/pub/repos/apt/dists/bullseye-pgdg/main/binary-amd64/Packages'
 packagesBullseye="local/$(echo "$packagesUrlBullseye" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 
 
@@ -578,7 +581,7 @@ is_skipped() {
 }
 
 skip_local() {
-    grep -E -v "(.\/)?local"
+    grep -E -v "(.\/)?local|\.git"
 }
 
 #  get_namespace_tag libary/foo/bar : get image tag with its final namespace
@@ -718,13 +721,21 @@ do_refresh_postgis() {
     curl -sSL "${packagesUrlJessie}.bz2"  | bunzip2 > "$packagesJessie"
     curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
     curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesBuster"
+    curl -sSL "${packagesUrlBullseye}.bz2" | bunzip2 > "$packagesBullseye"
+    curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
     for version in $POSTGIS_MINOR_TAGS;do
-        if (echo $version|grep -E -q "(9.0|9.1|9.2)-(2.0|2.1|2.2)");then
+        if (echo $version|grep -E -q "^(9.0|9.1|9.2)");then
             packages="$packagesJessie"
             debian_release=jessie
-        elif (echo $version|grep -E -q "^(11|12|13|14)");then
+        elif (echo $version|grep -E -q "^(9|10|11)");then
+            packages="$packagesStretch"
+            debian_release=stretch
+        elif (echo $version|grep -E -q "^(12)");then
             packages="$packagesBuster"
             debian_release=buster
+        elif (echo $version|grep -E -q "^(13|14|15|16)");then
+            packages="$packagesBullseye"
+            debian_release=bullseye
         else
             packages="$packagesBullseye"
             debian_release=bullseye
@@ -901,6 +912,14 @@ set_global_tags() {
     set_global_tag corpusops/postgis-bare:13-3           corpusops/postgis-bare:13
     set_global_tag corpusops/postgis-bare:13             corpusops/postgis-bare:latest
     set_global_tag corpusops/postgis-bare:13-alpine      corpusops/postgis-bare:alpine
+    set_global_tag corpusops/postgis-bare:14-3-alpine    corpusops/postgis-bare:14-alpine
+    set_global_tag corpusops/postgis-bare:14-3           corpusops/postgis-bare:14
+    set_global_tag corpusops/postgis-bare:14             corpusops/postgis-bare:latest
+    set_global_tag corpusops/postgis-bare:14-alpine      corpusops/postgis-bare:alpine
+    set_global_tag corpusops/postgis-bare:15-3-alpine    corpusops/postgis-bare:15-alpine
+    set_global_tag corpusops/postgis-bare:15-3           corpusops/postgis-bare:15
+    set_global_tag corpusops/postgis-bare:15             corpusops/postgis-bare:latest
+    set_global_tag corpusops/postgis-bare:15-alpine      corpusops/postgis-bare:alpine
 }
 
 record_build_image() {
@@ -1117,6 +1136,7 @@ load_batched_images() {
     local counter=0
     local default_batchsize=$1
     shift
+    local batched_images="$(echo $@ |xargs -n1)"
     for i in $@;do
         local imgs=${i//::*}
         local batchsize=$default_batchsize
