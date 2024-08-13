@@ -257,8 +257,8 @@ SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_
 CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
-SKIP_POSTGRES="postgres:(.*beta.*|.*alpine3.*|9.*alpine.*|9\.[0-9]+\.[0-9]+.*|9\.0|8.*|1[09]\.[0-9].*)$"
-SKIPPED_TAGS="$SKIP_MISC|$SKIP_PRE|$SKIP_POSTGRES|:(9|10|11)\."
+SKIP_POSTGRES="postgres:(.*beta.*|.*alpine3.*|.*alpine.*|9\.[0-9]+\.[0-9]+.*|9\.0|8.*|1[09]\.[0-9].*)$"
+SKIPPED_TAGS="$SKIP_MISC|$SKIP_PRE|$SKIP_POSTGRES|:(9|10|11)\.|:.*alpine.*"
 default_images="
 corpusops/postgis-bare
 "
@@ -285,16 +285,15 @@ MAILU_VERSiON=1.7
 
 BATCHED_IMAGES="\
 corpusops/postgis-bare/15-3\
- corpusops/postgis-bare/14-3\
- corpusops/postgis-bare/13-3\
- corpusops/postgis-bare/12-3\
- corpusops/postgis-bare/12-2.5\
- corpusops/postgis-bare/11-3\
+ corpusops/postgis-bare/14-3::30
+corpusops/postgis-bare/13-3\
+ corpusops/postgis-bare/12-3::30
+corpusops/postgis-bare/11-3\
  corpusops/postgis-bare/11-2.5\
  corpusops/postgis-bare/10-2.4\
  corpusops/postgis-bare/10-2.5\
- corpusops/postgis-bare/10-3\
- corpusops/postgis-bare/9.0-2.1\
+ corpusops/postgis-bare/10-3::30
+corpusops/postgis-bare/9.0-2.1\
  corpusops/postgis-bare/9.1-2.1\
  corpusops/postgis-bare/9.1-2.2\
  corpusops/postgis-bare/9.2-2.2\
@@ -308,23 +307,6 @@ corpusops/postgis-bare/15-3\
  corpusops/postgis-bare/9.6-2.4\
  corpusops/postgis-bare/9.6-2.5\
  corpusops/postgis-bare/9.4-2.4::32
-corpusops/postgis-bare/13-3-alpine\
- corpusops/postgis-bare/12-3-alpine\
- corpusops/postgis-bare/12-2.5-alpine\
- corpusops/postgis-bare/11-3-alpine\
- corpusops/postgis-bare/11-2.5-alpine\
- corpusops/postgis-bare/10-2.4-alpine\
- corpusops/postgis-bare/10-2.5-alpine\
- corpusops/postgis-bare/10-3-alpine\
- corpusops/postgis-bare/9.2-2.3-alpine\
- corpusops/postgis-bare/9.3-2.3-alpine\
- corpusops/postgis-bare/9.3-2.4-alpine\
- corpusops/postgis-bare/9.4-2.4-alpine\
- corpusops/postgis-bare/9.4-2.5-alpine\
- corpusops/postgis-bare/9.5-2.4-alpine\
- corpusops/postgis-bare/9.5-2.5-alpine\
- corpusops/postgis-bare/9.6-2.4-alpine\
- corpusops/postgis-bare/9.6-2.5-alpine::30
 "
 SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
 POSTGIS_MINOR_TAGS="
@@ -337,7 +319,7 @@ POSTGIS_MINOR_TAGS="
 9.4-2.5 9.5-2.5 9.6-2.5
 10-2.4 10-2.5 10-3
 11-2.5 11-3
-12-2.5 12-3
+12-3
 13-3
 14-3
 15-3
@@ -731,8 +713,8 @@ do_refresh_postgis() {
             packages="$packagesStretch"
             debian_release=stretch
         elif (echo $version|grep -E -q "^(12)");then
-            packages="$packagesBuster"
-            debian_release=buster
+            packages="$packagesBullseye"
+            debian_release=bullseye
         elif (echo $version|grep -E -q "^(13|14|15|16)");then
             packages="$packagesBullseye"
             debian_release=bullseye
@@ -807,9 +789,8 @@ EOF
     sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
     sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$cpostgis_alpine_version"'/g; s/%%POSTGIS_SHA256%%/'"$cpostgis_alpine_sha"'/g' "$imgalpine/Dockerfile"
     done
-    rm -rf corpusops/postgis-bare/9.0-2.1-alpine
-    rm -rf corpusops/postgis-bare/9.{1,2,3,4,5}-*-alpine
-    rm -rf corpusops/postgis-bare/9*-2.3-alpine
+    rm -rf corpusops/postgis-bare/*alpine
+    rm -rf corpusops/postgis-bare/*12*2.5
 }
 
 #  refresh_images $args: refresh images files
@@ -817,7 +798,6 @@ EOF
 #     refresh_images library/ubuntu: only refresh ubuntu images
 do_refresh_images() {
     local imagess="${@:-$default_images}"
-    cp -vf local/corpusops.bootstrap/bin/cops_pkgmgr_install.sh helpers/
     if [[ -z ${SKIP_REFRESH_COPS-} ]];then
     if ! ( grep -q corpusops/docker-images .git/config );then
     if [ ! -e local/docker-images ];then
@@ -825,7 +805,6 @@ do_refresh_images() {
     fi
     ( cd local/docker-images && git fetch --all && git reset --hard origin/master \
       && cp -rf helpers       rootfs packages ../..; )
-      # && cp -rf helpers Dock* rootfs packages ../..; )
     fi
     fi
     POSTGIS_URL="https://github.com/appropriate/docker-postgis.git"
@@ -906,8 +885,6 @@ set_global_tags() {
     set_global_tag corpusops/postgis-bare:10-2.5-alpine  corpusops/postgis-bare:10-alpine
     set_global_tag corpusops/postgis-bare:11-2.5         corpusops/postgis-bare:11
     set_global_tag corpusops/postgis-bare:11-2.5-alpine  corpusops/postgis-bare:11-alpine
-    set_global_tag corpusops/postgis-bare:12-2.5         corpusops/postgis-bare:12
-    set_global_tag corpusops/postgis-bare:12-2.5-alpine  corpusops/postgis-bare:12-alpine
     set_global_tag corpusops/postgis-bare:13-3-alpine    corpusops/postgis-bare:13-alpine
     set_global_tag corpusops/postgis-bare:13-3           corpusops/postgis-bare:13
     set_global_tag corpusops/postgis-bare:13             corpusops/postgis-bare:latest
