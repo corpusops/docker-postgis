@@ -25,6 +25,7 @@ RUN cd /tmp/corpusopssteroids \
     && cat ${_cops_SYSTEM}_optional_packages*.txt optional_packages*.txt > optional_packages.txt \
     && ./up.sh \
     && apt-get clean -y \
+    && cd / && rm -rf /tmp/corpusopssteroids /var/cache/apk/* /var/lib/apt/lists/* \
     && rm -rf /var/lib/apt/lists/*
 MAINTAINER Mike Dillon <mike@appropriate.io>
 
