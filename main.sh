@@ -887,11 +887,9 @@ set_global_tags() {
     set_global_tag corpusops/postgis-bare:11-2.5-alpine  corpusops/postgis-bare:11-alpine
     set_global_tag corpusops/postgis-bare:13-3-alpine    corpusops/postgis-bare:13-alpine
     set_global_tag corpusops/postgis-bare:13-3           corpusops/postgis-bare:13
-    set_global_tag corpusops/postgis-bare:13             corpusops/postgis-bare:latest
     set_global_tag corpusops/postgis-bare:13-alpine      corpusops/postgis-bare:alpine
     set_global_tag corpusops/postgis-bare:14-3-alpine    corpusops/postgis-bare:14-alpine
     set_global_tag corpusops/postgis-bare:14-3           corpusops/postgis-bare:14
-    set_global_tag corpusops/postgis-bare:14             corpusops/postgis-bare:latest
     set_global_tag corpusops/postgis-bare:14-alpine      corpusops/postgis-bare:alpine
     set_global_tag corpusops/postgis-bare:15-3-alpine    corpusops/postgis-bare:15-alpine
     set_global_tag corpusops/postgis-bare:15-3           corpusops/postgis-bare:15
