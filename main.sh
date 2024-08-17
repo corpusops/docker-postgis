@@ -325,33 +325,38 @@ POSTGIS_MINOR_TAGS="
 15-3
 "
 PGROUTING_MINOR_TAGS="
-9.4-2.4-2.4
-9.4-2.4-2.5
-9.4-2.4-2.6
+15-3-3.4
+14-3-3.4
+13-3-3.4
+12-3-3.1
+12-3-3.0
+11-3-3.1
+11-3-3.0
+11-2.5-2.6
+10-2.5-2.6
+9.6-2.5-2.6
+
 9.5-2.4-2.4
 9.5-2.4-2.5
 9.5-2.4-2.6
 9.6-2.4-2.4
 9.6-2.4-2.5
 9.6-2.4-2.6
-9.4-2.5-2.4
-9.4-2.5-2.5
 9.4-2.5-2.6
 9.5-2.5-2.4
 9.5-2.5-2.5
 9.5-2.5-2.6
 9.6-2.5-2.4
 9.6-2.5-2.5
-9.6-2.5-2.6
 10-2.4-2.4
 10-2.4-2.5
 10-2.4-2.6
 10-2.5-2.4
 10-2.5-2.5
-10-2.5-2.6
-11-2.5-2.4
 11-2.5-2.5
-11-2.5-2.6
+12-2.5-2.6
+12-2.5-2.6
+12-2.5-2.6
 "
 POSTGRES_MAJOR="9 10 11 12 13 14 15"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
@@ -363,6 +368,8 @@ packagesBuster="local/$(echo "$packagesUrlBuster" | sed -r 's/[^a-zA-Z.-]+/-/g')
 packagesUrlBullseye='http://apt.postgresql.org/pub/repos/apt/dists/bullseye-pgdg/main/binary-amd64/Packages'
 packagesBullseye="local/$(echo "$packagesUrlBullseye" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 
+PGROUTING_REPO="${PGROUTING_REPO:-"https://salsa.debian.org/debian-gis-team/pgrouting.git"}"
+PGROUTING_UPSTREAM_REPO="${PGROUTING_UPSTREAM_REPO:-"https://github.com/pgRouting/pgrouting.git"}"
 
 declare -A duplicated_tags
 declare -A registry_tokens
