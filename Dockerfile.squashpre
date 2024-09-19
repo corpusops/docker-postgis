@@ -1,0 +1,2 @@
+ARG ANCESTOR=${_cops_BASE}:${_cops_VERSION}
+ARG RSYNC=corpusops/rsync
