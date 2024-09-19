@@ -545,7 +545,7 @@ gen_image() {
         if [ -e "$df" ];then dockerfiles="$dockerfiles $df" && break;fi
     done
     local parts=""
-    for partsstep in squashpre from args argspost helpers pre base post postextra clean cleanpost predosquash squash postdosquash extra labels labelspost;do
+    for partsstep in squashpre from args argspost helpers pre base post postextra clean cleanpost predosquash squash squashpreexec squashexec postdosquash extra labels labelspost;do
         parts="$parts pre_${partsstep} ${partsstep} post_${partsstep}"
     done
     parts=$(echo "$parts"|xargs)
@@ -761,6 +761,7 @@ do_refresh_postgis() {
             && cat Dockerfile.pre \
             && grep -E -v "FROM" "$img/Dockerfile" \
             && cat Dockerfile.squash \
+            && cat Dockerfile.squashexec \
             && cat Dockerfile.post)"
         echo "$dockerfile" > "$img/Dockerfile"
         adockerfile="$(: \
@@ -769,6 +770,7 @@ do_refresh_postgis() {
             && cat Dockerfile.alpine.pre \
             && grep -E -v "FROM" "$imgalpine/Dockerfile" \
             && cat Dockerfile.squash \
+            && cat Dockerfile.squashexec \
             && cat Dockerfile.alpine.post)"
         adockerfile=$(python << EOF
 # -*- coding: utf-8 -*-
