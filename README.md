@@ -20,41 +20,12 @@
 ### postgis
 - The following `corpusops/postgis-bare:<tag>` Docker Image tags are supported. <br/>
   The form is ``corpusops/postgis-bare:<POSTGIS_VER>-<POSTGIS_VER>``
-    - 9 (copy of latest 9 tag)
-        - 9.0-2.1
-        - 9.1-2.2
-        - 9.2-2.2
-        - 9.2-2.2
-        - 9.2-2.3
-        - 9.3-2.3
-        - 9.3-2.4
-        - 9.4-2.3
-        - 9.4-2.4
-        - 9.4-2.5
-        - 9.5-2.4
-        - 9.5-2.5
-        - 9.6-2.4
-        - 9.6-2.5
-        - 9.0 (copy of latest 9.1-2.1 tag)
-        - 9.1 (copy of latest 9.1-2.2 tag)
-        - 9.2 (copy of latest 9.2-2.3 tag)
-        - 9.3 (copy of latest 9.3-2.4 tag)
-        - 9.4 (copy of latest 9.5-2.5 tag)
-        - 9.5 (copy of latest 9.4-2.5 tag)
-        - 9.6 (copy of latest 9.6-2.5 tag)
-    - 10 (copy of latest 10 tag)
-        - 10-2.4
-        - 10-2.5
-    - 11 (copy of latest 11 tag)
-        - 11-2.5
-    - 12 (copy of latest 12 tag)
-        - 12-2.5
-        - 12-3
-    - 13 (copy of latest 13 tag)
-        - 13-3
-    - 14 (copy of latest 14 tag)
-        - 14-3
-    - 15 (copy of latest 14 tag)
-        - 15-3
-    - latest: (copy of latest 15 tag)
+    - 12: 12-2.5, 12-3
+    - 13: 13-3
+    - 14: 14-3
+    - 15: 15-3
+    - 16: 16-3
+    - 17: 17-3
 
+## notes:
+- we must manually sync docker-postgis/*Dockerfiles* to local copy

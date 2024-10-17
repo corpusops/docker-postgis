@@ -1,6 +1,6 @@
-ARG ANCESTOR=postgres:16-bookworm
+ARG ANCESTOR=postgres:12-buster
 ARG RSYNC=corpusops/rsync
-FROM postgres:16-bookworm AS final
+FROM postgres:12-buster AS final
 ARG NONINTERACTIVE=y
 ADD \
     helpers/up.sh \
@@ -35,11 +35,11 @@ RUN cd /tmp/corpusopssteroids \
 
 
 LABEL maintainer="PostGIS Project - https://postgis.net" \
-      org.opencontainers.image.description="PostGIS 3.5.0+dfsg-1.pgdg110+1 spatial database extension with PostgreSQL 16 bookworm" \
+      org.opencontainers.image.description="PostGIS 2.5.5+dfsg-1.pgdg100+2 spatial database extension with PostgreSQL 12 buster" \
       org.opencontainers.image.source="https://github.com/postgis/docker-postgis"
 
-ENV POSTGIS_MAJOR 3
-ENV POSTGIS_VERSION 3.5.0+dfsg-1.pgdg110+1
+ENV POSTGIS_MAJOR 2.5
+ENV POSTGIS_VERSION 2.5.5+dfsg-1.pgdg100+2
 
 RUN apt-get update \
       && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
@@ -72,5 +72,5 @@ rsync -Aaz --delete ${ROOTFS}/ / --exclude=/proc --exclude=/sys --exclude=/etc/r
 SHELL ["/bin/sh", "-c"]
 LABEL com.github.corpusops.docker-images-commit="$DOCKER_IMAGES_COMMIT"
 ARG DOCKER_IMAGES_COMMIT=master
-ENV POSTGIS_MAJOR 3
-ENV POSTGIS_VERSION 3.5.0+dfsg-1.pgdg110+1
+ENV POSTGIS_MAJOR 2.5
+ENV POSTGIS_VERSION 2.5.5+dfsg-1.pgdg100+2
