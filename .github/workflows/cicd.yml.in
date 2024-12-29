@@ -66,6 +66,6 @@ jobs:
       matrix:
         IMAGES:$__IMAGES
 on:
-  push:
-  workflow_dispatch:
-  schedule: [{cron: '1 0 2,4,6,16,18,20 * *'}]
+  # push:
+  # workflow_dispatch:
+  # schedule: [{cron: '1 0 2,4,6,16,18,20 * *'}]

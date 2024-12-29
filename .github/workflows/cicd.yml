@@ -70,6 +70,6 @@ jobs:
         - "corpusops/postgis-bare/14-3 corpusops/postgis-bare/13-3"
         - "corpusops/postgis-bare/12-2.5 corpusops/postgis-bare/12-3"
 on:
-  push:
-  workflow_dispatch:
-  schedule: [{cron: '1 0 2,4,6,16,18,20 * *'}]
+  # push:
+  # workflow_dispatch:
+  # schedule: [{cron: '1 0 2,4,6,16,18,20 * *'}]
