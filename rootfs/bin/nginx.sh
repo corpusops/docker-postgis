@@ -15,7 +15,7 @@ export SSL_CERTS_PATH=${SSL_CERTS_PATH:-"/certs"}
 export SSL_CERT_BASENAME="${SSL_CERT_BASENAME:-"cert"}"
 export SSL_CERT_PATH=${SSL_CERT_PATH:-"${SSL_CERTS_PATH}/$SSL_CERT_BASENAME.crt"}
 export SSL_KEY_PATH=${SSL_KEY_PATH:-"${SSL_CERTS_PATH}/$SSL_CERT_BASENAME.key"}
-export NGINX_INJECT_DIR="${NGINX_INJECT_DIR:/nginx.d}"
+export NGINX_INJECT_DIR="${NGINX_INJECT_DIR:-/nginx.d}"
 export NGINX_HTTP_PROTECT_USER=${NGINX_HTTP_PROTECT_USER:-root}
 export NGINX_HTTP_PROTECT_PASSWORD=${NGINX_HTTP_PROTECT_PASSWORD-}
 export NGINX_SKIP_CHECK="${NGINX_SKIP_CHECK-}"
@@ -43,7 +43,7 @@ export NO_NGINX_LOGROTATE=${NO_NGINX_LOGROTATE-}
 export VHOST_TEMPLATES="${VHOST_TEMPLATES-"/etc/nginx/conf.d/default.conf"}"
 export VHOST_TEMPLATE_EXTS="${VHOST_TEMPLATE_EXTS:-frep template}"
 export NGINX_CONFIGS="${NGINX_CONFIGS-"
-$(find "$NGINX_CONF_DIR" -type f |grep -E -v "$NGINX_FREP_SKIP|\.(${VHOST_TEMPLATE_EXTS// /|})$")
+$(find "$NGINX_CONF_DIR" -type f |grep -E -v "$NGINX_FREP_SKIP|\.($(echo $VHOST_TEMPLATE_EXTS|sed -re "s/ /|/g"))$")
 /etc/logrotate.d/nginx"}"
 create_file() {
     for i in $@;do
@@ -54,6 +54,16 @@ create_file() {
 }
 log() { echo "$@" >&2; }
 vv() { log "$@";"$@"; }
+# refresh /etc/hosts for adjacents services & job container in gitab-ci
+if [ "x${REFRESH_HOSTS_FROM_CI-}" = "x1" ] && [ "x${COMMON_HOSTS_FILE}" != "x" ];then
+    while [ ! -e $COMMON_HOSTS_FILE ];do sleep 1;done
+    cat ${COMMON_HOSTS_FILE}>>/etc/hosts
+fi
+# refresh VHOST from current CI checkout
+if [ "x${REFRESH_VHOST_FROM_CI-}" = "x1" ];then
+    CI_VHOST=${CI_VHOST:-$CI_PROJECT_DIR/sys/etc/nginx/vhost.conf.template}
+    cp -vf $CI_VHOST /etc/nginx/conf.d/default.conf.template
+fi
 if [ "x${NGINX_USER}" = "x" ];then
     for i in www-data nginx www root;do
         if (getent passwd $i >/dev/null 2>&1);then NGINX_USER=$i;fi
@@ -79,7 +89,6 @@ for envline in $(env|grep -E "^([^\s ]+_)?HTTP_PROTECT_PASSWORD=");do
         filevariable="$(echo $variable|sed -re "s/PASSWORD$/FILE/g")"
         prefix="$(echo "$variable"|tr '[:upper:]' '[:lower:]'|sed -re "s/_http_protect_password//gi")"
         default_passwdfile="$NGINX_PASSWORDS_DIR/${prefix}protect"
-        echo $filevariable
         passwd_file="$(eval "echo "\${${filevariable}:-\$default_passwdfile}"")"
         passwd_user="$(eval "echo "\${${uservariable}:-root}"")"
         log "Generating HTPASSWD for $uservariable ($passwd_file & $NGINX_PASSWORD_FILE)"
@@ -92,7 +101,7 @@ IFS=${OIFS}
 # retrocompat: link all subpassword files in /etc/htpasswd/* to /etc/htpasswd-$i counterparts
 for i in $(find "$NGINX_PASSWORDS_DIR" -type f -maxdepth 1);do ln -sfv "$i" "/etc/htpasswd-$(basename $i)";done
 ###
-if [[ -z ${NGINX_SKIP_EXPOSE_HOST} ]];then
+if [ "x${NGINX_SKIP_EXPOSE_HOST}" = "x" ];then
     if ( ip -4 route list match 0/0 >/dev/null 2>&1 );then
         ip -4 route list match 0/0 | awk '{print $3" host.docker.internal"}' >> /etc/hosts
     fi
@@ -196,7 +205,7 @@ fi
 DEFAULT_NGINX_DEBUG_BIN=$(which nginx-debug 2>/dev/null )
 NGINX_DEBUG_BIN=${NGINX_DEBUG_BIN-$DEFAULT_NGINX_DEBUG_BIN}
 # if debug is enabled, try to see if we need to switch binary
-if ( grep -E -rvh "^(\s|\t| )*#" $NGINX_CONF_DIR | grep -E -rq "error_log .* debug" ) && \
+if ( grep -E -rvh "^(\s|\t| )*#" $NGINX_CONF_DIR | grep -E -q "error_log .* debug" ) && \
     [ "x$NGINX_DEBUG_BIN" != "x" ];then
     NGINX_BIN="$NGINX_DEBUG_BIN"
 fi
