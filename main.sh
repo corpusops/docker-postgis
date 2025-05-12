@@ -283,7 +283,8 @@ NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
 
 BATCHED_IMAGES="\
-corpusops/postgis-bare/15-3\
+corpusops/postgis-bare/16-3\
+ corpusops/postgis-bare/15-3\
  corpusops/postgis-bare/14-3::30
 corpusops/postgis-bare/13-3\
  corpusops/postgis-bare/12-3::30
@@ -322,8 +323,10 @@ POSTGIS_MINOR_TAGS="
 13-3
 14-3
 15-3
+16-3
 "
 PGROUTING_MINOR_TAGS="
+16-3-3.4
 15-3-3.4
 14-3-3.4
 13-3-3.4
@@ -357,7 +360,7 @@ PGROUTING_MINOR_TAGS="
 12-2.5-2.6
 12-2.5-2.6
 "
-POSTGRES_MAJOR="9 10 11 12 13 14 15"
+POSTGRES_MAJOR="9 10 11 12 13 14 15 16"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
@@ -721,7 +724,7 @@ do_refresh_postgis() {
         elif (echo $version|grep -E -q "^(12)");then
             packages="$packagesBullseye"
             debian_release=bullseye
-        elif (echo $version|grep -E -q "^(13|14|15|16)");then
+        elif (echo $version|grep -E -q "^(13|14|15|16|17)");then
             packages="$packagesBullseye"
             debian_release=bullseye
         else
@@ -896,11 +899,13 @@ set_global_tags() {
     set_global_tag corpusops/postgis-bare:13-alpine      corpusops/postgis-bare:alpine
     set_global_tag corpusops/postgis-bare:14-3-alpine    corpusops/postgis-bare:14-alpine
     set_global_tag corpusops/postgis-bare:14-3           corpusops/postgis-bare:14
-    set_global_tag corpusops/postgis-bare:14-alpine      corpusops/postgis-bare:alpine
+    set_global_tag corpusops/postgis-bare:14-alpine      corpusops/postgis-bare:alpine      
     set_global_tag corpusops/postgis-bare:15-3-alpine    corpusops/postgis-bare:15-alpine
     set_global_tag corpusops/postgis-bare:15-3           corpusops/postgis-bare:15
-    set_global_tag corpusops/postgis-bare:15             corpusops/postgis-bare:latest
-    set_global_tag corpusops/postgis-bare:15-alpine      corpusops/postgis-bare:alpine
+    set_global_tag corpusops/postgis-bare:16-3-alpine    corpusops/postgis-bare:16-alpine
+    set_global_tag corpusops/postgis-bare:16-3           corpusops/postgis-bare:16
+    set_global_tag corpusops/postgis-bare:16             corpusops/postgis-bare:latest
+    set_global_tag corpusops/postgis-bare:16-alpine      corpusops/postgis-bare:alpine
 }
 
 record_build_image() {

@@ -1,4 +1,4 @@
-FROM postgres:12
+FROM postgres:16
 ARG NONINTERACTIVE=y
 ADD \
     helpers/up.sh \
