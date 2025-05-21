@@ -26,6 +26,10 @@ NORMAL="\\e[0;0m"
 NO_COLOR=${NO_COLORS-${NO_COLORS-${NOCOLOR-${NOCOLORS-}}}}
 LOGGER_NAME=${LOGGER_NAME:-corpusops_build}
 ERROR_MSG="There were errors"
+ver_ge() { [  "$2" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; }
+ver_gt() { [ "$1" = "$2" ] && return 1 || ver_ge $1 $2; }
+ver_le() { [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]; }
+ver_lt() { [ "$1" = "$2" ] && return 1 || ver_le $1 $2; }
 uniquify_string() {
     local pattern=$1
     shift
@@ -238,7 +242,6 @@ SKIP_OS="$SKIP_OS|((debian|redis):[0-9]+\.[0-9]+.*)"
 SKIP_OS="$SKIP_OS|(centos:.\..\.....|centos.\..\.....)"
 SKIP_OS="$SKIP_OS|(alpine:.\.[0-9]+\.[0-9]+)"
 SKIP_OS="$SKIP_OS|(debian:(6.*|squeeze))"
-SKIP_OS="$SKIP_OS|(ubuntu:(([0-9][0-9]\.[0-9][0-9]\..*)|(14.10|12|10|11|13|15)))"
 SKIP_OS="$SKIP_OS|(lucid|maverick|natty|precise|quantal|raring|saucy)"
 SKIP_OS="$SKIP_OS|(centos:(centos)?5)"
 SKIP_OS="$SKIP_OS|(fedora.*(modular|21))"
@@ -253,6 +256,7 @@ SKIP_TF="(tensorflow.serving:[0-9].*)"
 SKIP_MINIO="(k8s-operator|((minio|mc):(RELEASE.)?[0-9]{4}-.{7}))"
 SKIP_MAILU="(mailu.*(feat|patch|merg|refactor|revert|upgrade|fix-|pr-template))"
 SKIP_DOCKER="docker(\/|:)([0-9]+\.[0-9]+\.|17|18.0[1-6]|1$|1(\.|-)).*"
+SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_MAILU|$SKIP_MINOR|$SKIP_PRE|$SKIP_OS|$SKIP_PHP|$SKIP_WINDOWS|$SKIP_MISC"
 CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
@@ -540,7 +544,11 @@ gen_image() {
         local df="$folder/Dockerfile.override"
         if [ -e "$df" ];then dockerfiles="$dockerfiles $df" && break;fi
     done
-    local parts="from args argspost helpers pre base post clean cleanpost extra labels labelspost"
+    local parts=""
+    for partsstep in squashpre from args argspost helpers pre base post postextra clean cleanpost squash extra labels labelspost;do
+        parts="$parts pre_${partsstep} ${partsstep} post_${partsstep}"
+    done
+    parts=$(echo "$parts"|xargs)
     for order in $parts;do
         for folder in . .. ../../..;do
             local df="$folder/Dockerfile.$order"
@@ -602,7 +610,6 @@ do_get_namespace_tag() {
     done
 }
 
-
 filter_tags() {
     for j in $@ ;do for i in $j;do
         if is_skipped "$n:$i";then debug "Skipped: $n:$i";else printf "$i\n";fi
@@ -645,8 +652,8 @@ get_image_tags() {
                 if ! ( echo "$atags" | grep -E -q "^$ix\.${j}\." );then continue;fi
                 for flavor in "" \
                     alpine alpine3.13 alpine3.14 alpine3.15 alpine3.16 alpine3.5 \
-                    trusty xenial bionic focal jammy \
-                    bullseye stretch buster jessie \
+                    trusty xenial bionic focal jammy noble \
+                    bookworm bullseye stretch buster jessie \
                     ;do
                     selected=""
                     if [[ -z "$flavor" ]];then
@@ -749,15 +756,19 @@ do_refresh_postgis() {
         cp -vf patch* "$img/"
         cp -vf docker-postgis/Dockerfile.alpine.template "$imgalpine/Dockerfile"
         dockerfile="$(: \
-            && grep -E    "FROM" "$img/Dockerfile" \
+            && cat Dockerfile.squashpre|sed -re "s/ANCESTOR=.*/ANCESTOR=/g" \
+            && grep -E    "FROM" "$img/Dockerfile" | sed -re "s/(FROM.*)/\1 AS final/g" \
             && cat Dockerfile.pre \
             && grep -E -v "FROM" "$img/Dockerfile" \
+            && cat Dockerfile.squash \
             && cat Dockerfile.post)"
         echo "$dockerfile" > "$img/Dockerfile"
         adockerfile="$(: \
-            && grep -E    "FROM" "$imgalpine/Dockerfile" \
+            && cat Dockerfile.squashpre \
+            && grep -E    "FROM" "$imgalpine/Dockerfile" | sed -re "s/(FROM.*)/\1 AS final/g" \
             && cat Dockerfile.alpine.pre \
             && grep -E -v "FROM" "$imgalpine/Dockerfile" \
+            && cat Dockerfile.squash \
             && cat Dockerfile.alpine.post)"
         adockerfile=$(python << EOF
 # -*- coding: utf-8 -*-
@@ -797,6 +808,15 @@ EOF
     fi
     sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
     sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$cpostgis_alpine_version"'/g; s/%%POSTGIS_SHA256%%/'"$cpostgis_alpine_sha"'/g' "$imgalpine/Dockerfile"
+    for dockerfile in "$img/Dockerfile" "$imgalpine/Dockerfile";do
+        ancestor=$(echo $(grep -iE "from.*as final" "$dockerfile"|head -n1|awk '{print $2}'))
+        if (echo "$ancestor" | grep -Eq '^[$]');then
+            pattern=$(echo "$ancestor="|sed -re "s/[{}$]//g")
+            ancestor=$(echo $(grep -iE "$pattern" "$dockerfile"|head -n1|awk -F= '{print $2}'))
+        fi
+        sed -i -re "s/ANCESTOR=.*/ANCESTOR=$ancestor/g" "$dockerfile"
+        cat "$dockerfile" | egrep -E "^(MAINTAINER|ENV)" >> "$dockerfile"
+    done
     done
     rm -rf corpusops/postgis-bare/*alpine
     rm -rf corpusops/postgis-bare/*12*2.5
@@ -807,13 +827,14 @@ EOF
 #     refresh_images library/ubuntu: only refresh ubuntu images
 do_refresh_images() {
     local imagess="${@:-$default_images}"
+    cp -vf local/corpusops.bootstrap/bin/cops_pkgmgr_install.sh helpers/
     if [[ -z ${SKIP_REFRESH_COPS-} ]];then
     if ! ( grep -q corpusops/docker-images .git/config );then
     if [ ! -e local/docker-images ];then
         git clone https://github.com/corpusops/docker-images local/docker-images
     fi
     ( cd local/docker-images && git fetch --all && git reset --hard origin/master \
-      && cp -rf helpers       rootfs packages ../..; )
+      && cp -rf helpers Dockerfile.*squash* rootfs packages ../..; )
     fi
     fi
     POSTGIS_URL="https://github.com/appropriate/docker-postgis.git"
@@ -850,20 +871,20 @@ is_same_commit_label() {
     return $ret
 }
 
-get_docker_squash_args() {
-    DOCKER_DO_SQUASH=${DOCKER_DO_SQUASH-init}
-    if ! ( echo "${NO_SQUASH-}"|grep -E -q "^(no)?$" );then
-        DOCKER_DO_SQUASH=""
-        log "no squash"
-    elif [[ "$DOCKER_DO_SQUASH" = init ]];then
-        DOCKER_DO_SQUASH="--squash"
-        if ! (printf "FROM alpine\nRUN touch foo\n" | docker build --squash - >/dev/null 2>&1 );then
-            DOCKER_DO_SQUASH=
-            log "docker squash isnt not supported"
-        fi
-    fi
-    echo $DOCKER_DO_SQUASH
-}
+#get_docker_squash_args() {
+#    DOCKER_DO_SQUASH=${DOCKER_DO_SQUASH-init}
+#    if ! ( echo "${NO_SQUASH-}"|grep -E -q "^(no)?$" );then
+#        DOCKER_DO_SQUASH=""
+#        log "no squash"
+#    elif [[ "$DOCKER_DO_SQUASH" = init ]];then
+#        DOCKER_DO_SQUASH="--squash"
+#        if ! (printf "FROM alpine\nRUN touch foo\n" | docker build --squash - >/dev/null 2>&1 );then
+#            DOCKER_DO_SQUASH=
+#            log "docker squash isnt not supported"
+#        fi
+#    fi
+#    echo $DOCKER_DO_SQUASH
+#}
 
 set_global_tag() {
     val=${duplicated_tags[$1]}
@@ -899,7 +920,7 @@ set_global_tags() {
     set_global_tag corpusops/postgis-bare:13-alpine      corpusops/postgis-bare:alpine
     set_global_tag corpusops/postgis-bare:14-3-alpine    corpusops/postgis-bare:14-alpine
     set_global_tag corpusops/postgis-bare:14-3           corpusops/postgis-bare:14
-    set_global_tag corpusops/postgis-bare:14-alpine      corpusops/postgis-bare:alpine      
+    set_global_tag corpusops/postgis-bare:14-alpine      corpusops/postgis-bare:alpine
     set_global_tag corpusops/postgis-bare:15-3-alpine    corpusops/postgis-bare:15-alpine
     set_global_tag corpusops/postgis-bare:15-3           corpusops/postgis-bare:15
     set_global_tag corpusops/postgis-bare:16-3-alpine    corpusops/postgis-bare:16-alpine
@@ -922,7 +943,7 @@ record_build_image() {
         log "Image $itag is update to date, skipping build"
         return
     fi
-    dargs="${DOCKER_BUILD_ARGS-} $(get_docker_squash_args)"
+    dargs="${DOCKER_BUILD_ARGS-}"
     local dbuild="cat $image/$df|docker build ${dargs-}  -t $itag . -f - --build-arg=DOCKER_IMAGES_COMMIT=$git_commit"
     local retries=${DOCKER_BUILD_RETRIES:-2}
     local cmd="dret=8 && for i in \$(seq $retries);do if ($dbuild);then dret=0;break;else dret=6;fi;done"
