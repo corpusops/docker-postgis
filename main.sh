@@ -580,7 +580,7 @@ is_skipped() {
 }
 
 skip_local() {
-    grep -E -v "(.\/)?local|\.git"
+    grep -E -v "(.\/)?local|\.git|docker-postgis|docker-pgrouting"
 }
 
 #  get_namespace_tag libary/foo/bar : get image tag with its final namespace
