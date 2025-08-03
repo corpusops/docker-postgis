@@ -260,7 +260,7 @@ SKIPPED_TAGS="$SKIP_TF|$SKIP_MINOR_OS|$SKIP_NODE|$SKIP_DOCKER|$SKIP_MINIO|$SKIP_
 CURRENT_TS=$(date +%s)
 IMAGES_SKIP_NS="((mailhog|postgis|pgrouting(-bare)?|^library|dejavu|(minio/(minio|mc))))"
 
-POSTGIS_SKIPPED_TAGS="postgis.*:((.*1[3-9].-[0-3]|9|10|11)\.|.*alpine.*)"
+POSTGIS_SKIPPED_TAGS="postgis(-bare)?:(((8|9|10|11)($|\.|-|$))|.*(rc|bullseye|buster|bookworm|stretch|jessie|alpine|beta))"
 SKIPPED_TAGS="$POSTGIS_SKIPPED_TAGS"
 PROTECTED_VERSIONS=""
 default_images="
@@ -288,12 +288,8 @@ find_top_node() { (set +e && find_top_node_ && set -e;); }
 NODE_TOP="$(echo $(find_top_node))"
 MAILU_VERSiON=1.7
 
-BATCHED_IMAGES="\
-corpusops/postgis-bare/16-3\
- corpusops/postgis-bare/15-3\
- corpusops/postgis-bare/14-3::30
-corpusops/postgis-bare/13-3\
- corpusops/postgis-bare/12-3::30
+
+UNSUPPORTED_BATCHED_IMAGES="
 corpusops/postgis-bare/11-3\
  corpusops/postgis-bare/11-2.5\
  corpusops/postgis-bare/10-2.4\
@@ -312,10 +308,17 @@ corpusops/postgis-bare/9.0-2.1\
  corpusops/postgis-bare/9.5-2.5\
  corpusops/postgis-bare/9.6-2.4\
  corpusops/postgis-bare/9.6-2.5\
- corpusops/postgis-bare/9.4-2.4::32
+ corpusops/postgis-bare/9.4-2.4
+"
+BATCHED_IMAGES="\
+corpusops/postgis-bare/16-3\
+ corpusops/postgis-bare/15-3::30
+corpusops/postgis-bare/14-3\
+ corpusops/postgis-bare/13-3\
+ corpusops/postgis-bare/12-3::30
 "
 SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
-POSTGIS_MINOR_TAGS="
+UNSUPPORTED_POSTGIS_MINOR_TAGS="
 9.0-2.1
 9.1-2.2
 9.2-2.2 9.2-2.3
@@ -325,20 +328,15 @@ POSTGIS_MINOR_TAGS="
 9.4-2.5 9.5-2.5 9.6-2.5
 10-2.4 10-2.5 10-3
 11-2.5 11-3
+"
+POSTGIS_MINOR_TAGS="
 12-3
 13-3
 14-3
 15-3
 16-3
 "
-PGROUTING_MINOR_TAGS="
-16-3-3.4
-15-3-3.4
-14-3-3.4
-13-3-3.4
-13-3-3.1
-12-3-3.1
-12-3-3.0
+UNSUPPORTED_PGROUTING_MINOR_TAGS="
 11-3-3.1
 11-3-3.0
 11-2.5-2.6
@@ -362,11 +360,21 @@ PGROUTING_MINOR_TAGS="
 10-2.4-2.6
 10-2.5-2.4
 10-2.5-2.5
+"
+PGROUTING_MINOR_TAGS="
+16-3-3.4
+15-3-3.4
+14-3-3.4
+13-3-3.4
+13-3-3.1
+12-3-3.1
+12-3-3.0
 12-2.5-2.6
 12-2.5-2.6
 12-2.5-2.6
 "
-POSTGRES_MAJOR="9 10 11 12 13 14 15 16"
+UNSUPPORTED_POSTGRES_MAJOR="9 10 11"
+POSTGRES_MAJOR="12 13 14 15 16"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
