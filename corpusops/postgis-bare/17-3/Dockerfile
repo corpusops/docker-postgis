@@ -1,6 +1,6 @@
-ARG ANCESTOR=postgres:16-bookworm
+ARG ANCESTOR=postgres:17-bookworm
 ARG RSYNC=corpusops/rsync
-FROM postgres:16-bookworm AS final
+FROM postgres:17-bookworm AS final
 ARG NONINTERACTIVE=y
 ADD \
     helpers/up.sh \
@@ -35,7 +35,7 @@ RUN cd /tmp/corpusopssteroids \
 
 
 LABEL maintainer="PostGIS Project - https://postgis.net" \
-      org.opencontainers.image.description="PostGIS 3.5.0+dfsg-1.pgdg110+1 spatial database extension with PostgreSQL 16 bookworm" \
+      org.opencontainers.image.description="PostGIS 3.5.0+dfsg-1.pgdg110+1 spatial database extension with PostgreSQL 17 bookworm" \
       org.opencontainers.image.source="https://github.com/postgis/docker-postgis"
 
 ENV POSTGIS_MAJOR 3

@@ -311,10 +311,12 @@ corpusops/postgis-bare/9.0-2.1\
  corpusops/postgis-bare/9.4-2.4
 "
 BATCHED_IMAGES="\
+corpusops/postgis-bare/17-3::30
 corpusops/postgis-bare/16-3\
  corpusops/postgis-bare/15-3::30
 corpusops/postgis-bare/14-3\
- corpusops/postgis-bare/13-3\
+ corpusops/postgis-bare/13-3::30
+corpusops/postgis-bare/12-2.5\
  corpusops/postgis-bare/12-3::30
 "
 SKIP_REFRESH_ANCESTORS=${SKIP_REFRESH_ANCESTORS-}
@@ -330,11 +332,13 @@ UNSUPPORTED_POSTGIS_MINOR_TAGS="
 11-2.5 11-3
 "
 POSTGIS_MINOR_TAGS="
+12-2.5
 12-3
 13-3
 14-3
 15-3
 16-3
+17-3
 "
 UNSUPPORTED_PGROUTING_MINOR_TAGS="
 11-3-3.1
@@ -370,19 +374,20 @@ PGROUTING_MINOR_TAGS="
 12-3-3.1
 12-3-3.0
 12-2.5-2.6
-12-2.5-2.6
-12-2.5-2.6
 "
 UNSUPPORTED_POSTGRES_MAJOR="9 10 11"
-POSTGRES_MAJOR="12 13 14 15 16"
+POSTGRES_MAJOR="12 13 14 15 16 17"
 packagesUrlJessie='http://apt-archive.postgresql.org/pub/repos/apt/dists/jessie-pgdg/main/binary-amd64/Packages'
 packagesJessie="local/$(echo "$packagesUrlJessie" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlStretch='http://apt-archive.postgresql.org/pub/repos/apt/dists/stretch-pgdg/main/binary-amd64/Packages'
 packagesStretch="local/$(echo "$packagesUrlStretch" | sed -r 's/[^a-zA-Z.-]+/-/g')"
-packagesUrlBuster='http://apt.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
+packagesUrlBuster='http://apt-archive.postgresql.org/pub/repos/apt/dists/buster-pgdg/main/binary-amd64/Packages'
 packagesBuster="local/$(echo "$packagesUrlBuster" | sed -r 's/[^a-zA-Z.-]+/-/g')"
 packagesUrlBullseye='http://apt.postgresql.org/pub/repos/apt/dists/bullseye-pgdg/main/binary-amd64/Packages'
 packagesBullseye="local/$(echo "$packagesUrlBullseye" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+packagesUrlBookworm='http://apt.postgresql.org/pub/repos/apt/dists/bookworm-pgdg/main/binary-amd64/Packages'
+packagesBookworm="local/$(echo "$packagesUrlBookworm" | sed -r 's/[^a-zA-Z.-]+/-/g')"
+
 
 PGROUTING_REPO="${PGROUTING_REPO:-"https://salsa.debian.org/debian-gis-team/pgrouting.git"}"
 PGROUTING_UPSTREAM_REPO="${PGROUTING_UPSTREAM_REPO:-"https://github.com/pgRouting/pgrouting.git"}"
@@ -732,27 +737,31 @@ do_clean_tags() {
 }
 
 do_refresh_postgis() {
-    curl -sSL "${packagesUrlJessie}.bz2"  | bunzip2 > "$packagesJessie"
-    curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
-    curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesBuster"
+    curl -sSL "${packagesUrlJessie}.bz2"   | bunzip2 > "$packagesJessie"
+    curl -sSL "${packagesUrlStretch}.bz2"  | bunzip2 > "$packagesStretch"
+    curl -sSL "${packagesUrlBuster}.bz2"   | bunzip2 > "$packagesBuster"
     curl -sSL "${packagesUrlBullseye}.bz2" | bunzip2 > "$packagesBullseye"
-    curl -sSL "${packagesUrlStretch}.bz2" | bunzip2 > "$packagesStretch"
+    curl -sSL "${packagesUrlBookworm}.bz2" | bunzip2 > "$packagesBookworm"
+    # 12: buster, 13-17: bookworm
     for version in $POSTGIS_MINOR_TAGS;do
         if (echo $version|grep -E -q "^(9.0|9.1|9.2)");then
             packages="$packagesJessie"
-            debian_release=jessie
+            debian_release="jessie"
         elif (echo $version|grep -E -q "^(9|10|11)");then
             packages="$packagesStretch"
-            debian_release=stretch
+            debian_release="stretch"
+        elif (echo $version|grep -E -q -- "-2..$");then
+            packages="$packagesBuster"
+            debian_release="buster"
         elif (echo $version|grep -E -q "^(12)");then
-            packages="$packagesBullseye"
-            debian_release=bullseye
+            packages="$packagesBuster"
+            debian_release="buster"
         elif (echo $version|grep -E -q "^(13|14|15|16|17)");then
             packages="$packagesBullseye"
-            debian_release=bullseye
+            debian_release="bookworm"
         else
-            packages="$packagesBullseye"
-            debian_release=bullseye
+            packages="$packagesBookworm"
+            debian_release="bookworm"
         fi
         IFS=- read pg_major postgis_major <<< "$version"
         img="corpusops/postgis-bare/$version"
@@ -824,8 +833,8 @@ EOF
         cpostgis_alpine_version=${postgis_alpine_vers[$postgis_major]}
         cpostgis_alpine_sha=${postgis_alpine_vers[$cpostgis_alpine_version]}
     fi
-    sed -i 's/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
-    sed -i 's/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$cpostgis_alpine_version"'/g; s/%%POSTGIS_SHA256%%/'"$cpostgis_alpine_sha"'/g' "$imgalpine/Dockerfile"
+    sed -i 's/%%DEBIAN_VERSION%%/'$debian_release'/g; s/%%PG_MAJOR%%/'$pg_major'/g; s/%%POSTGIS_MAJOR%%/'$postgis_major'/g; s/%%POSTGIS_VERSION%%/'$fullVersion'/g' "$img/Dockerfile"
+    sed -i 's/%%DEBIAN_VERSION%%/'$debian_release'/g; s/%%PG_MAJOR%%/'"$pg_major"'/g; s/%%POSTGIS_VERSION%%/'"$cpostgis_alpine_version"'/g; s/%%POSTGIS_SHA256%%/'"$cpostgis_alpine_sha"'/g' "$imgalpine/Dockerfile"
     for dockerfile in "$img/Dockerfile" "$imgalpine/Dockerfile";do
         ancestor=$(echo $(grep -iE "from.*as final" "$dockerfile"|head -n1|awk '{print $2}'))
         if (echo "$ancestor" | grep -Eq '^[$]');then
@@ -837,7 +846,7 @@ EOF
     done
     done
     rm -rf corpusops/postgis-bare/*alpine
-    rm -rf corpusops/postgis-bare/*12*2.5
+    #rm -rf corpusops/postgis-bare/*12*2.5
 }
 
 #  refresh_images $args: refresh images files

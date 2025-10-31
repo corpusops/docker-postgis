@@ -65,8 +65,10 @@ jobs:
       fail-fast: false
       matrix:
         IMAGES:
+        - "corpusops/postgis-bare/17-3"
         - "corpusops/postgis-bare/16-3 corpusops/postgis-bare/15-3"
-        - "corpusops/postgis-bare/14-3 corpusops/postgis-bare/13-3 corpusops/postgis-bare/12-3"
+        - "corpusops/postgis-bare/14-3 corpusops/postgis-bare/13-3"
+        - "corpusops/postgis-bare/12-2.5 corpusops/postgis-bare/12-3"
 on:
   push:
   workflow_dispatch:
